@@ -43,7 +43,7 @@
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L5.333 13.333 2 14l.667-3.333L11.333 2z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
               수정
             </RouterLink>
-            <button style="font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid #fee2e2; background:#fff; color:#ef4444; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500;">
+            <button @click="handleDelete" style="font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid #fee2e2; background:#fff; color:#ef4444; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500;">
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5.333 4V2.667A1.333 1.333 0 0 1 6.667 1.333h2.666A1.333 1.333 0 0 1 10.667 2.667V4M12.667 4l-.667 9.333A1.333 1.333 0 0 1 10.667 14.667H5.333A1.333 1.333 0 0 1 4 13.333L3.333 4" stroke="#ef4444" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
               삭제
             </button>
@@ -161,10 +161,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { getProject, getProjectApplications, updateApplicationStatus } from '../api/project.js'
+import { useRoute, useRouter } from 'vue-router'
+import { getProject, getProjectApplications, updateApplicationStatus, deleteProject } from '../api/project.js'
+import { userId } from '../store/auth.js'
 
 const route = useRoute()
+const router = useRouter()
 const project = ref({})
 const applicants = ref([])
 
@@ -191,6 +193,17 @@ const tabs = computed(() => [
 const filteredApplicants = computed(() =>
   activeTab.value === '전체' ? applicants.value : applicants.value.filter(a => a.status === activeTab.value)
 )
+
+async function handleDelete() {
+  if (!confirm('프로젝트를 삭제할까요?')) return
+  try {
+    await deleteProject(route.params.id, userId.value)
+    router.push('/mypage')
+  } catch (e) {
+    console.error('[삭제 실패]', e?.response?.status, e?.response?.data)
+    alert('삭제에 실패했습니다.')
+  }
+}
 
 async function updateStatus(applicationId, status) {
   try {
