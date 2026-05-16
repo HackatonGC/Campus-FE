@@ -12,6 +12,7 @@ import ProjectManageView from '../views/ProjectManageView.vue'
 import QnaView from '../views/QnaView.vue'
 import QnaDetailView from '../views/QnaDetailView.vue'
 import QnaWriteView from '../views/QnaWriteView.vue'
+import UserProfileView from '../views/UserProfileView.vue'
 
 const routes = [
   { path: '/', component: HomeView },
@@ -27,6 +28,7 @@ const routes = [
   { path: '/qna', component: QnaView },
   { path: '/qna/write', component: QnaWriteView },
   { path: '/qna/:id', component: QnaDetailView },
+  { path: '/user/:id', component: UserProfileView },
 ]
 
 export default createRouter({
