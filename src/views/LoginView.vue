@@ -140,7 +140,7 @@
               <input
                 v-model="signupSchool"
                 type="text"
-                placeholder="서울대학교"
+                placeholder="가천대학교"
                 class="rounded-xl text-sm outline-none transition"
                 style="display: flex; width: 100%; height: 44px; padding: 4px 12px; align-items: center; background: #F9FAFB; color: #111827"
               />
@@ -246,7 +246,14 @@ const signupSchool = ref('')
 const signupDept = ref('')
 const signupEmail = ref('')
 const signupPassword = ref('')
-const techOptions = ['React', 'Spring', 'Android', 'Unity', 'Python', 'Vue', 'Flutter', 'Node.js', 'Swift', 'Kotlin']
+const techOptions = [
+  'React', 'Next.js', 'Vue', 'Angular',
+  'Spring', 'Spring Boot', 'Node.js', 'Express', 'Django', 'FastAPI',
+  'Android', 'iOS', 'Flutter', 'React Native',
+  'Unity', 'Unreal', 'AI/ML', 'TensorFlow', 'PyTorch',
+  'MySQL', 'PostgreSQL', 'MongoDB', 'Redis',
+  'Docker', 'Kubernetes', 'AWS', 'Firebase'
+]
 const selectedTech = ref([])
 
 function toggleTech(tag) {
