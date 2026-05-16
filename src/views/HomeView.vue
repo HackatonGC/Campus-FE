@@ -17,9 +17,9 @@
         <!-- 메뉴 (비활성화) -->
         <div></div>
         <!-- 로그인 -->
-        <button style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; background:none; border:none; cursor:pointer;">
+        <RouterLink to="/login" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; text-decoration:none; cursor:pointer;">
           <img :src="iconLogout" style="width:16px; height:16px;" alt="" /> 로그인
-        </button>
+        </RouterLink>
       </div>
     </nav>
 
