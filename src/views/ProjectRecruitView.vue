@@ -13,7 +13,7 @@
             <div style="color:#9ca3af; font-size:11px;">함께 성장하는 개발자</div>
           </div>
         </RouterLink>
-        <RouterLink to="/project/new" style="font-size:14px; color:#6b7280; text-decoration:none;">← 유형 선택으로</RouterLink>
+        <RouterLink :to="editId ? `/project/${editId}` : '/project/new'" style="font-size:14px; color:#6b7280; text-decoration:none;">{{ editId ? '← 프로젝트로 돌아가기' : '← 유형 선택으로' }}</RouterLink>
       </div>
     </nav>
 
@@ -25,8 +25,8 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           팀원 모집
         </div>
-        <h1 style="font-size:28px; font-weight:800; color:#111827; margin:0 0 8px;">함께할 팀원을 모집해요</h1>
-        <p style="font-size:15px; color:#9ca3af; margin:0;">구체적으로 작성할수록 좋은 팀원을 만날 수 있어요</p>
+        <h1 style="font-size:28px; font-weight:800; color:#111827; margin:0 0 8px;">{{ editId ? '모집 공고 수정' : '함께할 팀원을 모집해요' }}</h1>
+        <p style="font-size:15px; color:#9ca3af; margin:0;">{{ editId ? '내용을 수정한 후 저장해주세요' : '구체적으로 작성할수록 좋은 팀원을 만날 수 있어요' }}</p>
       </div>
 
       <!-- 기본 정보 -->
@@ -187,8 +187,8 @@
 
       <!-- 제출 버튼 -->
       <div style="display:flex; gap:12px; justify-content:flex-end;">
-        <RouterLink to="/project/new" style="padding:14px 28px; border-radius:12px; border:1.5px solid #e5e7eb; background:#fff; color:#374151; font-size:15px; font-weight:600; text-decoration:none; display:flex; align-items:center;">취소</RouterLink>
-        <button @click="submit" style="padding:14px 36px; border-radius:12px; border:none; background:#6366f1; color:#fff; font-size:15px; font-weight:700; cursor:pointer;">모집 공고 올리기</button>
+        <RouterLink :to="editId ? `/project/${editId}` : '/project/new'" style="padding:14px 28px; border-radius:12px; border:1.5px solid #e5e7eb; background:#fff; color:#374151; font-size:15px; font-weight:600; text-decoration:none; display:flex; align-items:center;">취소</RouterLink>
+        <button @click="submit" style="padding:14px 36px; border-radius:12px; border:none; background:#6366f1; color:#fff; font-size:15px; font-weight:700; cursor:pointer;">{{ editId ? '수정 완료' : '모집 공고 올리기' }}</button>
       </div>
 
     </div>
@@ -196,12 +196,14 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { uploadImage } from '../utils/cloudinary.js'
-import { createProject } from '../api/project.js'
+import { createProject, getProject, updateProject } from '../api/project.js'
 
 const router = useRouter()
+const route = useRoute()
+const editId = route.params.id
 
 const techOptions = [
   'React', 'Next.js', 'Vue', 'Angular',
@@ -243,6 +245,36 @@ const form = reactive({
   thumbnailUrl: '',
   roles: [{ name: '', count: 1, skills: '', description: '' }],
   recruitMessage: '',
+})
+
+onMounted(async () => {
+  if (!editId) return
+  try {
+    const data = await getProject(editId)
+    form.title = data.title ?? ''
+    form.summary = data.summary ?? ''
+    form.description = data.description ?? ''
+    form.techStacks = [...(data.techStacks ?? [])]
+    form.duration = data.duration ?? ''
+    form.meetingType = data.meetingType ?? ''
+    form.deadline = data.deadline ?? ''
+    form.githubUrl = data.githubUrl ?? ''
+    form.figmaUrl = data.figmaUrl ?? ''
+    form.notionUrl = data.notionUrl ?? ''
+    form.deployUrl = data.deployUrl ?? ''
+    form.thumbnailUrl = data.thumbnailUrl ?? ''
+    thumbnailPreview.value = data.thumbnailUrl ?? ''
+    form.recruitMessage = data.recruitMessage ?? ''
+    const loaded = (data.recruitments ?? []).map(r => ({
+      name: r.role,
+      count: r.count,
+      skills: r.skills ?? '',
+      description: r.description ?? '',
+    }))
+    form.roles = loaded.length ? loaded : [{ name: '', count: 1, skills: '', description: '' }]
+  } catch (e) {
+    console.error('[프로젝트 불러오기 실패]', e)
+  }
 })
 
 async function onThumbnailChange(e) {
@@ -307,11 +339,16 @@ async function submit() {
   }
 
   try {
-    await createProject(payload)
-    router.push({ path: '/', state: { registered: true } })
+    if (editId) {
+      await updateProject(editId, payload)
+      router.push(`/project/${editId}`)
+    } else {
+      await createProject(payload)
+      router.push({ path: '/', state: { registered: true } })
+    }
   } catch (e) {
-    console.error('[모집 등록 실패]', e?.response?.status, e?.response?.data)
-    alert('등록에 실패했습니다. 다시 시도해주세요.')
+    console.error('[모집 프로젝트 저장 실패]', e?.response?.status, e?.response?.data)
+    alert('저장에 실패했습니다. 다시 시도해주세요.')
   }
 }
 </script>

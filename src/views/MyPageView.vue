@@ -89,7 +89,7 @@
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.333A6.67 6.67 0 0 0 1.333 8c0 2.946 1.912 5.44 4.559 6.32.333.06.454-.146.454-.323v-1.13c-1.853.4-2.247-.896-2.247-.896-.303-.77-.74-1.04-.74-1.04-.605-.413.046-.405.046-.405.669.047 1.02.687 1.02.687.595 1.02 1.561.725 1.941.554.06-.43.233-.725.424-.892-1.48-.168-3.034-.74-3.034-3.293 0-.727.26-1.323.687-1.788-.069-.168-.297-.847.065-1.766 0 0 .56-.179 1.834.683A6.4 6.4 0 0 1 8 4.67c.567.003 1.138.077 1.671.226 1.274-.862 1.833-.683 1.833-.683.363.919.135 1.598.066 1.766.428.465.686 1.06.686 1.788 0 2.56-1.557 3.123-3.04 3.288.239.206.451.612.451 1.234v1.83c0 .178.12.386.458.32A6.672 6.672 0 0 0 14.667 8 6.67 6.67 0 0 0 8 1.333z" fill="#374151"/></svg>
                     GitHub
                   </a>
-                  <RouterLink :to="`/project/${p.id}/edit`" style="font-size:12px; padding:5px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500; text-decoration:none;">
+                  <RouterLink :to="`/project/${p.status === 'RECRUITING' ? 'recruit' : 'complete'}/${p.id}/edit`" style="font-size:12px; padding:5px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500; text-decoration:none;">
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L5.333 13.333 2 14l.667-3.333L11.333 2z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     수정
                   </RouterLink>
@@ -141,21 +141,25 @@
         <div v-if="activeMenu === 'bookmarks'" style="background:#fff; border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
           <h2 style="font-size:16px; font-weight:700; color:#111827; margin:0 0 20px;">북마크</h2>
           <div style="display:flex; flex-direction:column; gap:12px;">
-            <div v-for="p in bookmarkedProjects" :key="p.bookmarkId" style="padding:16px; border:1px solid #f3f4f6; border-radius:12px;">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
-                <span style="font-size:15px; font-weight:700; color:#111827;">{{ p.title }}</span>
-                <span v-if="p.status === 'RECRUITING'" style="font-size:11px; background:#10b981; color:#fff; padding:2px 8px; border-radius:999px; font-weight:600; flex-shrink:0; margin-left:8px;">모집중</span>
-              </div>
-              <p style="font-size:13px; color:#6b7280; margin:0 0 10px;">{{ p.summary }}</p>
-              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                <span v-for="tech in (p.techStacks ?? [])" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-size:12px; color:#9ca3af; display:flex; gap:12px;">
-                  <span>👁 {{ p.viewCount ?? 0 }}</span>
-                  <span>❤️ {{ p.likeCount ?? 0 }}</span>
+            <div v-for="p in bookmarkedProjects" :key="p.bookmarkId" style="display:flex; border:1px solid #f3f4f6; border-radius:12px; overflow:hidden;">
+              <img v-if="p.thumbnailUrl" :src="p.thumbnailUrl" style="width:120px; min-height:110px; object-fit:cover; flex-shrink:0;" />
+              <div v-else style="width:120px; min-height:110px; flex-shrink:0; background:linear-gradient(135deg,#6366f1,#818cf8); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:900; color:#fff;">{{ (p.title ?? '?').charAt(0) }}</div>
+              <div style="flex:1; min-width:0; padding:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+                  <span style="font-size:15px; font-weight:700; color:#111827;">{{ p.title }}</span>
+                  <span v-if="p.status === 'RECRUITING'" style="font-size:11px; background:#10b981; color:#fff; padding:2px 8px; border-radius:999px; font-weight:600; flex-shrink:0; margin-left:8px;">모집중</span>
                 </div>
-                <RouterLink :to="`/project/${p.projectId}`" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; text-decoration:none; font-weight:500;">게시글 보기</RouterLink>
+                <p style="font-size:13px; color:#6b7280; margin:0 0 10px;">{{ p.summary }}</p>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+                  <span v-for="tech in (p.techStacks ?? [])" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="font-size:12px; color:#9ca3af; display:flex; gap:12px;">
+                    <span>👁 {{ p.viewCount ?? 0 }}</span>
+                    <span>❤️ {{ p.likeCount ?? 0 }}</span>
+                  </div>
+                  <RouterLink :to="`/project/${p.projectId}`" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; text-decoration:none; font-weight:500;">게시글 보기</RouterLink>
+                </div>
               </div>
             </div>
           </div>
@@ -165,21 +169,25 @@
         <div v-if="activeMenu === 'likes'" style="background:#fff; border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
           <h2 style="font-size:16px; font-weight:700; color:#111827; margin:0 0 20px;">좋아요</h2>
           <div style="display:flex; flex-direction:column; gap:12px;">
-            <div v-for="p in likedProjects" :key="p.likeId" style="padding:16px; border:1px solid #f3f4f6; border-radius:12px;">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
-                <span style="font-size:15px; font-weight:700; color:#111827;">{{ p.title }}</span>
-                <span v-if="p.status === 'RECRUITING'" style="font-size:11px; background:#10b981; color:#fff; padding:2px 8px; border-radius:999px; font-weight:600; flex-shrink:0; margin-left:8px;">모집중</span>
-              </div>
-              <p style="font-size:13px; color:#6b7280; margin:0 0 10px;">{{ p.summary }}</p>
-              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                <span v-for="tech in (p.techStacks ?? [])" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-size:12px; color:#9ca3af; display:flex; gap:12px;">
-                  <span>👁 {{ p.viewCount ?? 0 }}</span>
-                  <span style="color:#ef4444;">❤️ {{ p.likeCount ?? 0 }}</span>
+            <div v-for="p in likedProjects" :key="p.likeId" style="display:flex; border:1px solid #f3f4f6; border-radius:12px; overflow:hidden;">
+              <img v-if="p.thumbnailUrl" :src="p.thumbnailUrl" style="width:120px; min-height:110px; object-fit:cover; flex-shrink:0;" />
+              <div v-else style="width:120px; min-height:110px; flex-shrink:0; background:linear-gradient(135deg,#6366f1,#818cf8); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:900; color:#fff;">{{ (p.title ?? '?').charAt(0) }}</div>
+              <div style="flex:1; min-width:0; padding:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+                  <span style="font-size:15px; font-weight:700; color:#111827;">{{ p.title }}</span>
+                  <span v-if="p.status === 'RECRUITING'" style="font-size:11px; background:#10b981; color:#fff; padding:2px 8px; border-radius:999px; font-weight:600; flex-shrink:0; margin-left:8px;">모집중</span>
                 </div>
-                <RouterLink :to="`/project/${p.projectId}`" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; text-decoration:none; font-weight:500;">게시글 보기</RouterLink>
+                <p style="font-size:13px; color:#6b7280; margin:0 0 10px;">{{ p.summary }}</p>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+                  <span v-for="tech in (p.techStacks ?? [])" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="font-size:12px; color:#9ca3af; display:flex; gap:12px;">
+                    <span>👁 {{ p.viewCount ?? 0 }}</span>
+                    <span style="color:#ef4444;">❤️ {{ p.likeCount ?? 0 }}</span>
+                  </div>
+                  <RouterLink :to="`/project/${p.projectId}`" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; text-decoration:none; font-weight:500;">게시글 보기</RouterLink>
+                </div>
               </div>
             </div>
           </div>

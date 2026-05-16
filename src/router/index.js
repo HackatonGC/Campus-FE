@@ -25,6 +25,8 @@ const routes = [
   { path: '/project/new', component: ProjectTypeSelectView },
   { path: '/project/recruit/new', component: ProjectRecruitView },
   { path: '/project/complete/new', component: ProjectCompleteView },
+  { path: '/project/recruit/:id/edit', component: ProjectRecruitView },
+  { path: '/project/complete/:id/edit', component: ProjectCompleteView },
   { path: '/project/:id/edit', component: ProjectRegisterView },
   { path: '/project/preview', component: ProjectPreviewView },
   { path: '/project/:id', component: DetailView },

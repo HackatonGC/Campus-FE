@@ -21,7 +21,7 @@
             <span v-if="project.status === 'RECRUITING'" style="font-size:11px; background:#10b981; color:#fff; padding:2px 10px; border-radius:999px; font-weight:600;">모집중</span>
           </div>
           <div style="display:flex; gap:8px;">
-            <RouterLink :to="`/project/${route.params.id}/edit`" style="font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500; text-decoration:none;">
+            <RouterLink :to="`/project/${project.status === 'RECRUITING' ? 'recruit' : 'complete'}/${route.params.id}/edit`" style="font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500; text-decoration:none;">
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L5.333 13.333 2 14l.667-3.333L11.333 2z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
               수정
             </RouterLink>

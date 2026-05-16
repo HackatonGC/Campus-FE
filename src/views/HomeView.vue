@@ -217,7 +217,7 @@
 <script setup>
 import { ref, reactive, watch, onMounted, onUnmounted } from 'vue'
 import { techOptions } from '../data/dummy.js'
-import { getProjects, getPopularTags, addBookmark, removeBookmark } from '../api/project.js'
+import { getProjects, getPopularTags, addBookmark, removeBookmark, getMyBookmarks } from '../api/project.js'
 import { isLoggedIn, clearAuth } from '../store/auth.js'
 import iconBookmark from '../assets/Icon (10).svg'
 import iconLike     from '../assets/Icon (9).svg'
@@ -261,6 +261,13 @@ onMounted(async () => {
     history.replaceState({}, '')
   }
   fetchProjects()
+  if (isLoggedIn.value) {
+    try {
+      const bookmarks = await getMyBookmarks()
+      const list = Array.isArray(bookmarks) ? bookmarks : []
+      list.forEach(b => { bookmarkedIds[b.projectId] = true })
+    } catch {}
+  }
 })
 
 const bookmarkedIds = reactive({})
