@@ -66,9 +66,19 @@
 
           <!-- 지원 메시지 -->
           <div style="margin-bottom:24px;">
-            <label style="display:block; font-size:14px; font-weight:700; color:#374151; margin-bottom:8px;">
-              지원 메시지 <span style="color:#ef4444;">*</span>
-            </label>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <label style="font-size:14px; font-weight:700; color:#374151;">
+                지원 메시지 <span style="color:#ef4444;">*</span>
+              </label>
+              <button
+                @click="generateWithAI"
+                :disabled="!selectedRole || aiLoading"
+                :style="`display:flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:6px 12px; border-radius:8px; border:1.5px solid ${selectedRole && !aiLoading ? '#6366f1' : '#e5e7eb'}; background:${selectedRole && !aiLoading ? '#fafbff' : '#f9fafb'}; color:${selectedRole && !aiLoading ? '#6366f1' : '#9ca3af'}; cursor:${selectedRole && !aiLoading ? 'pointer' : 'not-allowed'}; transition:all 0.15s;`"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                {{ aiLoading ? 'AI 작성 중...' : 'AI로 작성' }}
+              </button>
+            </div>
             <textarea
               v-model="message"
               placeholder="참여 동기, 기여할 수 있는 부분, 관련 경험 등을 자유롭게 작성해주세요"
@@ -102,6 +112,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { applyToProject, getProject } from '../api/project.js'
+import { getPortfolio } from '../api/user.js'
+import { userId } from '../store/auth.js'
 import NavBar from '../components/NavBar.vue'
 
 const route = useRoute()
@@ -113,6 +125,8 @@ const selectedRole = ref('')
 const message = ref('')
 const submitting = ref(false)
 const errorMsg = ref('')
+
+const aiLoading = ref(false)
 
 const isFull = (r) => (r.acceptedCount ?? 0) >= r.count
 
@@ -130,6 +144,69 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+async function generateWithAI() {
+  if (!selectedRole.value || aiLoading.value) return
+  aiLoading.value = true
+  try {
+    const role = selectedRole.value
+    const title = project.value?.title ?? ''
+    const summary = project.value?.summary ?? ''
+    const description = project.value?.description ?? ''
+    const techs = (project.value?.techStacks ?? []).join(', ')
+    const roleInfo = project.value?.recruitments?.find(r => r.role === role)
+    const roleSkills = roleInfo?.skills ?? ''
+
+    let myBio = ''
+    let myTechs = ''
+    try {
+      const portfolio = await getPortfolio(userId.value)
+      myBio = portfolio?.bio ?? ''
+      myTechs = (portfolio?.techStacks ?? []).join(', ')
+    } catch {}
+
+    const prompt = `당신은 대학생 개발자입니다. 아래 프로젝트에 "${role}" 역할로 지원하는 지원 메시지를 한국어로 작성해주세요.
+
+[프로젝트 정보]
+프로젝트명: ${title}
+프로젝트 소개: ${summary}
+프로젝트 상세: ${description}
+기술 스택: ${techs}
+지원 역할: ${role}${roleSkills ? `\n역할 요구 스킬: ${roleSkills}` : ''}
+
+[지원자 정보]
+이름: ${localStorage.getItem('userName') ?? ''}${myBio ? `\n자기소개: ${myBio}` : ''}${myTechs ? `\n보유 기술: ${myTechs}` : ''}
+
+조건:
+- 300자 이내로 간결하게
+- 지원자의 실제 기술과 자기소개를 바탕으로 프로젝트와 연결되는 내용 작성
+- 참여 동기, 기여할 수 있는 부분을 자연스럽게 포함
+- 딱딱하지 않고 진심 어린 톤
+- 지원 메시지 본문만 출력 (제목, 인사말 없이)`
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': import.meta.env.VITE_CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    })
+    const data = await res.json()
+    const text = data?.content?.[0]?.text ?? ''
+    if (text) message.value = text.slice(0, 500)
+  } catch {
+    // 실패 시 조용히 무시
+  } finally {
+    aiLoading.value = false
+  }
+}
 
 async function handleApply() {
   if (!canSubmit.value) return
