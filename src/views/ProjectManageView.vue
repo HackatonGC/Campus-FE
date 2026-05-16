@@ -42,7 +42,7 @@
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
           <div style="display:flex; align-items:center; gap:10px;">
             <span style="font-size:18px; font-weight:700; color:#111827;">{{ project.title }}</span>
-            <span v-if="project.isRecruiting" style="font-size:11px; background:#10b981; color:#fff; padding:2px 10px; border-radius:999px; font-weight:600;">모집중</span>
+            <span v-if="project.status === 'RECRUITING'" style="font-size:11px; background:#10b981; color:#fff; padding:2px 10px; border-radius:999px; font-weight:600;">모집중</span>
           </div>
           <div style="display:flex; gap:8px;">
             <button style="font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500;">
@@ -57,7 +57,7 @@
         </div>
         <p style="font-size:13px; color:#6b7280; margin:0 0 12px;">{{ project.description }}</p>
         <div style="display:flex; flex-wrap:wrap; gap:6px;">
-          <span v-for="tech in project.techStack" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 10px; border-radius:999px;">{{ tech }}</span>
+          <span v-for="tech in (project.techStacks ?? [])" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 10px; border-radius:999px;">{{ tech }}</span>
         </div>
       </div>
 
@@ -107,12 +107,12 @@
                 <!-- 이름 + 상태 -->
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
                   <span style="font-size:15px; font-weight:700; color:#111827;">{{ a.name }}</span>
-                  <span :style="a.status === '검토중'
+                  <span :style="a.status === 'PENDING'
                     ? 'font-size:11px; background:#fef3c7; color:#d97706; padding:2px 8px; border-radius:999px; font-weight:600;'
-                    : a.status === '승인됨'
+                    : a.status === 'ACCEPTED'
                       ? 'font-size:11px; background:#d1fae5; color:#059669; padding:2px 8px; border-radius:999px; font-weight:600;'
                       : 'font-size:11px; background:#fee2e2; color:#ef4444; padding:2px 8px; border-radius:999px; font-weight:600;'">
-                    {{ a.status }}
+                    {{ a.status === 'PENDING' ? '검토중' : a.status === 'ACCEPTED' ? '승인됨' : '거절됨' }}
                   </span>
                 </div>
                 <!-- 소속 -->
@@ -145,12 +145,12 @@
               <!-- 우측 버튼 -->
               <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; margin-left:20px; flex-shrink:0;">
                 <button style="font-size:13px; padding:6px 16px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; font-weight:500; white-space:nowrap;">상세 보기</button>
-                <div v-if="a.status === '검토중'" style="display:flex; gap:6px;">
-                  <button @click="updateStatus(a.id, '거절됨')" style="font-size:13px; padding:6px 14px; border-radius:8px; border:1.5px solid #fca5a5; background:#fff; color:#ef4444; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <div v-if="a.status === 'PENDING'" style="display:flex; gap:6px;">
+                  <button @click="updateStatus(a.id, 'REJECTED')" style="font-size:13px; padding:6px 14px; border-radius:8px; border:1.5px solid #fca5a5; background:#fff; color:#ef4444; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;">
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>
                     거절
                   </button>
-                  <button @click="updateStatus(a.id, '승인됨')" style="font-size:13px; padding:6px 14px; border-radius:8px; border:none; background:#10b981; color:#fff; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;">
+                  <button @click="updateStatus(a.id, 'ACCEPTED')" style="font-size:13px; padding:6px 14px; border-radius:8px; border:none; background:#10b981; color:#fff; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;">
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M10.5 3.5L5 9 2.5 6.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     승인
                   </button>
@@ -166,43 +166,42 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { getProject, getProjectApplications, updateApplicationStatus } from '../api/project.js'
 
-const project = {
-  title: 'AI 기반 학습 관리 시스템',
-  isRecruiting: true,
-  description: '학생들의 학습 패턴을 분석하고 맞춤형 학습 경로를 추천하는 플랫폼',
-  techStack: ['React', 'TypeScript', 'Python', 'TensorFlow'],
-  slots: [
-    { role: 'Frontend', current: 1, total: 2 },
-    { role: 'Backend', current: 1, total: 1 },
-    { role: 'AI Engineer', current: 0, total: 1 },
-  ],
-}
+const route = useRoute()
+const project = ref({})
+const applicants = ref([])
 
-const applicants = ref([
-  { id: 1, name: '이프론트', status: '검토중', university: '연세대학교', department: '컴퓨터과학과', introduction: 'React와 TypeScript를 활용한 프론트엔드 개발 경험이 3년 있습니다. 사용자 경험을 최우선으로 생각하며, 성능 최적화에 관심이 많습니다.', techStack: ['React', 'TypeScript', 'Next.js', 'Tailwind'], role: 'Frontend', date: '2024-03-15', github: true, portfolio: true },
-  { id: 2, name: '박백엔드', status: '승인됨', university: '고려대학교', department: '소프트웨어학과', introduction: 'Spring Boot와 Python을 사용한 백엔드 개발 경험이 있습니다. RESTful API 설계와 데이터베이스 최적화에 강점이 있습니다.', techStack: ['Python', 'FastAPI', 'PostgreSQL', 'Docker'], role: 'Backend', date: '2024-03-14', github: true, portfolio: false },
-  { id: 3, name: '최인공', status: '검토중', university: 'KAIST', department: '인공지능학과', introduction: '머신러닝과 딥러닝 모델 개발 경험이 있습니다. TensorFlow와 PyTorch를 활용한 다양한 프로젝트를 진행했습니다.', techStack: ['Python', 'TensorFlow', 'PyTorch', 'Scikit-learn'], role: 'AI Engineer', date: '2024-03-16', github: true, portfolio: true },
-  { id: 4, name: '김리액트', status: '거절됨', university: '서울대학교', department: '전기정보공학부', introduction: 'UI/UX에 관심이 많고, 반응형 웹 개발에 능숙합니다. 컴포넌트 재사용성과 코드 품질을 중요하게 생각합니다.', techStack: ['React', 'TypeScript', 'Redux', 'Styled-components'], role: 'Frontend', date: '2024-03-13', github: true, portfolio: false },
-])
+onMounted(async () => {
+  try {
+    project.value = await getProject(route.params.id)
+  } catch {}
+  try {
+    const data = await getProjectApplications(route.params.id)
+    applicants.value = Array.isArray(data) ? data : []
+  } catch {}
+})
 
 const activeTab = ref('전체')
 
-const tabs = computed(() => {
-  const roles = [...new Set(applicants.value.map(a => a.role))]
-  return [
-    { key: '전체', label: `전체 (${applicants.value.length})` },
-    ...roles.map(r => ({ key: r, label: `${r} (${applicants.value.filter(a => a.role === r).length})` })),
-  ]
-})
+const tabs = computed(() => [
+  { key: '전체', label: `전체 (${applicants.value.length})` },
+  { key: 'PENDING', label: `검토중 (${applicants.value.filter(a => a.status === 'PENDING').length})` },
+  { key: 'ACCEPTED', label: `승인됨 (${applicants.value.filter(a => a.status === 'ACCEPTED').length})` },
+  { key: 'REJECTED', label: `거절됨 (${applicants.value.filter(a => a.status === 'REJECTED').length})` },
+])
 
 const filteredApplicants = computed(() =>
-  activeTab.value === '전체' ? applicants.value : applicants.value.filter(a => a.role === activeTab.value)
+  activeTab.value === '전체' ? applicants.value : applicants.value.filter(a => a.status === activeTab.value)
 )
 
-function updateStatus(id, status) {
-  const a = applicants.value.find(a => a.id === id)
-  if (a) a.status = status
+async function updateStatus(applicationId, status) {
+  try {
+    await updateApplicationStatus(route.params.id, applicationId, status)
+    const a = applicants.value.find(a => a.id === applicationId)
+    if (a) a.status = status
+  } catch {}
 }
 </script>

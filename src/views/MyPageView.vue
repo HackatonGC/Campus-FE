@@ -135,12 +135,12 @@
             <div v-for="p in appliedProjects" :key="p.id" style="padding:16px; border:1px solid #f3f4f6; border-radius:12px;">
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
                 <span style="font-size:15px; font-weight:700; color:#111827;">{{ p.title }}</span>
-                <span :style="p.status === '검토중'
+                <span :style="p.status === 'PENDING'
                   ? 'font-size:11px; background:#fef3c7; color:#d97706; padding:2px 8px; border-radius:999px; font-weight:600; flex-shrink:0;'
-                  : p.status === '승인됨'
+                  : p.status === 'ACCEPTED'
                     ? 'font-size:11px; background:#d1fae5; color:#059669; padding:2px 8px; border-radius:999px; font-weight:600; flex-shrink:0;'
                     : 'font-size:11px; background:#fee2e2; color:#ef4444; padding:2px 8px; border-radius:999px; font-weight:600; flex-shrink:0;'">
-                  {{ p.status }}
+                  {{ p.status === 'PENDING' ? '검토중' : p.status === 'ACCEPTED' ? '승인됨' : '거절됨' }}
                 </span>
               </div>
               <p style="font-size:13px; color:#6b7280; margin:0 0 10px;">{{ p.summary }}</p>
@@ -155,7 +155,7 @@
                 </div>
                 <div style="display:flex; gap:8px;">
                   <RouterLink :to="`/project/${p.id}`" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; text-decoration:none; font-weight:500;">게시글 보기</RouterLink>
-                  <button v-if="p.status === '검토중'" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #fee2e2; background:#fff; color:#ef4444; cursor:pointer; font-weight:500;">지원 취소</button>
+                  <button v-if="p.status === 'PENDING'" @click="handleCancelApplication(p.projectId, p.id)" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #fee2e2; background:#fff; color:#ef4444; cursor:pointer; font-weight:500;">지원 취소</button>
                 </div>
               </div>
             </div>
@@ -237,7 +237,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getProjects } from '../api/project.js'
+import { getProjects, getMyBookmarks, getMyLikes, getMyApplications, cancelApplication } from '../api/project.js'
 import { userId, clearAuth } from '../store/auth.js'
 import { useRouter } from 'vue-router'
 
@@ -281,7 +281,29 @@ onMounted(async () => {
     stats[0].value.value = myProjects.value.length
     stats[1].value.value = myProjects.value.reduce((s, p) => s + (p.likeCount ?? 0), 0)
   } catch {}
+
+  try {
+    const data = await getMyBookmarks()
+    bookmarkedProjects.value = Array.isArray(data) ? data : []
+  } catch {}
+
+  try {
+    const data = await getMyLikes()
+    likedProjects.value = Array.isArray(data) ? data : []
+  } catch {}
+
+  try {
+    const data = await getMyApplications()
+    appliedProjects.value = Array.isArray(data) ? data : []
+  } catch {}
 })
+
+async function handleCancelApplication(projectId, applicationId) {
+  try {
+    await cancelApplication(projectId, applicationId)
+    appliedProjects.value = appliedProjects.value.filter(a => a.id !== applicationId)
+  } catch {}
+}
 
 function handleLogout() {
   clearAuth()

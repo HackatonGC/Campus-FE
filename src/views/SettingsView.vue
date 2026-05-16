@@ -20,7 +20,7 @@
         <RouterLink to="/mypage" style="display:flex; align-items:center; gap:8px; text-decoration:none; cursor:pointer;">
           <div style="text-align:right;">
             <div style="font-weight:600; font-size:14px; color:#111827;">{{ user.name }}</div>
-            <div style="font-size:12px; color:#9ca3af;">{{ user.university }}</div>
+            <div style="font-size:12px; color:#9ca3af;">{{ user.school }}</div>
           </div>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </RouterLink>
@@ -66,9 +66,15 @@
           <!-- 개인정보 -->
           <div v-if="activeMenu === 'profile'" style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
             <!-- 헤더 -->
-            <div style="margin-bottom:24px;">
-              <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">개인정보</h2>
-              <p style="font-size:13px; color:#9ca3af; margin:0;">기본 프로필 정보를 확인하세요</p>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+              <div>
+                <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">개인정보</h2>
+                <p style="font-size:13px; color:#9ca3af; margin:0;">기본 프로필 정보를 확인하세요</p>
+              </div>
+              <button v-if="!profileEditing" @click="startProfileEdit"
+                style="background:#6366f1; color:#fff; border:none; cursor:pointer; padding:8px 20px; border-radius:10px; font-size:14px; font-weight:600;">
+                수정하기
+              </button>
             </div>
 
             <!-- 아바타 + 이름 -->
@@ -78,31 +84,31 @@
               </div>
               <div>
                 <div style="font-size:18px; font-weight:700; color:#111827; margin-bottom:2px;">{{ user.name }}</div>
-                <div style="font-size:13px; color:#9ca3af;">{{ user.university }} · {{ user.department }}</div>
+                <div style="font-size:13px; color:#9ca3af;">{{ user.school }} · {{ user.department }}</div>
               </div>
             </div>
 
-            <!-- 이름 / 닉네임 -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-              <div>
-                <div style="font-size:13px; color:#9ca3af; margin-bottom:6px;">이름</div>
-                <div style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ user.name }}</div>
-              </div>
-              <div>
-                <div style="font-size:13px; color:#9ca3af; margin-bottom:6px;">닉네임</div>
-                <div style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ user.nickname }}</div>
-              </div>
+            <!-- 이름 -->
+            <div style="margin-bottom:16px;">
+              <div style="font-size:13px; color:#9ca3af; margin-bottom:6px;">이름</div>
+              <input v-if="profileEditing" v-model="editName"
+                style="width:100%; height:44px; padding:0 14px; background:#fff; border:1.5px solid #6366f1; border-radius:10px; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
+              <div v-else style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ user.name }}</div>
             </div>
 
             <!-- 학교 / 학과 -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
               <div>
                 <div style="font-size:13px; color:#9ca3af; margin-bottom:6px;">학교</div>
-                <div style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ user.university }}</div>
+                <input v-if="profileEditing" v-model="editSchool"
+                  style="width:100%; height:44px; padding:0 14px; background:#fff; border:1.5px solid #6366f1; border-radius:10px; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
+                <div v-else style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ user.school }}</div>
               </div>
               <div>
                 <div style="font-size:13px; color:#9ca3af; margin-bottom:6px;">학과</div>
-                <div style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ user.department }}</div>
+                <input v-if="profileEditing" v-model="editDepartment"
+                  style="width:100%; height:44px; padding:0 14px; background:#fff; border:1.5px solid #6366f1; border-radius:10px; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
+                <div v-else style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ user.department }}</div>
               </div>
             </div>
 
@@ -119,31 +125,24 @@
             </div>
 
             <!-- 가입일 -->
-            <div style="margin-bottom:16px;">
+            <div style="margin-bottom:24px;">
               <div style="font-size:13px; color:#9ca3af; margin-bottom:6px;">가입일</div>
-              <div style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ user.joinedAt }}</div>
+              <div style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ formatDate(user.createdAt) }}</div>
             </div>
 
-            <!-- 관심 기술 스택 -->
-            <div style="margin-bottom:28px;">
-              <div style="font-size:13px; color:#9ca3af; margin-bottom:6px;">관심 기술 스택</div>
-              <div style="min-height:44px; padding:10px 14px; background:#f9fafb; border-radius:10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-                <span v-for="tech in user.techStack" :key="tech" style="font-size:13px; background:#ede9fe; color:#6366f1; padding:3px 10px; border-radius:999px; font-weight:500;">{{ tech }}</span>
-              </div>
+            <!-- 저장/취소 버튼 (편집 중일 때) -->
+            <div v-if="profileEditing" style="display:flex; align-items:center; gap:12px; justify-content:flex-end;">
+              <span v-if="profileEditMsg" :style="`font-size:13px; color:${profileEditMsg.includes('실패') ? '#ef4444' : '#10b981'};`">{{ profileEditMsg }}</span>
+              <button @click="profileEditing = false" style="padding:10px 24px; border-radius:10px; border:1.5px solid #e5e7eb; background:#fff; color:#374151; font-size:14px; font-weight:600; cursor:pointer;">취소</button>
+              <button @click="saveBasicProfile" style="padding:10px 24px; border-radius:10px; border:none; background:#6366f1; color:#fff; font-size:14px; font-weight:600; cursor:pointer;">저장</button>
             </div>
-
-            <!-- 수정하기 버튼 -->
-            <button
-              @click="activeMenu = 'edit'"
-              style="background:#6366f1; color:#fff; border:none; cursor:pointer; padding:10px 24px; border-radius:10px; font-size:14px; font-weight:600;"
-            >수정하기</button>
           </div>
 
-          <!-- 프로필 수정 -->
+          <!-- 포트폴리오 -->
           <div v-else-if="activeMenu === 'edit'" style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
             <div style="margin-bottom:28px;">
-              <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">프로필 수정</h2>
-              <p style="font-size:13px; color:#9ca3af; margin:0;">프로필 정보를 수정하세요</p>
+              <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">포트폴리오</h2>
+              <p style="font-size:13px; color:#9ca3af; margin:0;">자기소개와 포트폴리오 정보를 관리하세요</p>
             </div>
 
             <!-- 자기소개 -->
@@ -199,9 +198,10 @@
             </div>
 
             <!-- 버튼 -->
-            <div style="display:flex; gap:12px; justify-content:flex-end;">
+            <div style="display:flex; align-items:center; gap:12px; justify-content:flex-end;">
+              <span v-if="editMsg" :style="`font-size:13px; color:${editMsg.includes('실패') ? '#ef4444' : '#10b981'};`">{{ editMsg }}</span>
               <button @click="activeMenu = 'profile'" style="padding:10px 24px; border-radius:10px; border:1.5px solid #e5e7eb; background:#fff; color:#374151; font-size:14px; font-weight:600; cursor:pointer;">취소</button>
-              <button style="padding:10px 24px; border-radius:10px; border:none; background:#6366f1; color:#fff; font-size:14px; font-weight:600; cursor:pointer;">저장</button>
+              <button @click="saveProfile" style="padding:10px 24px; border-radius:10px; border:none; background:#6366f1; color:#fff; font-size:14px; font-weight:600; cursor:pointer;">저장</button>
             </div>
           </div>
 
@@ -233,8 +233,9 @@
                 </div>
               </div>
 
-              <div style="margin-top:24px; display:flex; justify-content:flex-end;">
-                <button style="padding:10px 24px; border-radius:10px; border:none; background:#6366f1; color:#fff; font-size:14px; font-weight:600; cursor:pointer;">비밀번호 변경</button>
+              <div style="margin-top:24px; display:flex; align-items:center; gap:12px; justify-content:flex-end;">
+                <span v-if="pwMsg" :style="`font-size:13px; color:${pwMsg.includes('변경되었') ? '#10b981' : '#ef4444'};`">{{ pwMsg }}</span>
+                <button @click="handleChangePassword" style="padding:10px 24px; border-radius:10px; border:none; background:#6366f1; color:#fff; font-size:14px; font-weight:600; cursor:pointer;">비밀번호 변경</button>
               </div>
             </div>
 
@@ -276,7 +277,7 @@
                 </div>
                 <!-- 토글 스위치 -->
                 <button
-                  @click="item.enabled = !item.enabled"
+                  @click="togglePrivacy(item)"
                   :style="item.enabled
                     ? 'width:48px; height:28px; border-radius:999px; background:#6366f1; border:none; cursor:pointer; position:relative; transition:background 0.2s; flex-shrink:0;'
                     : 'width:48px; height:28px; border-radius:999px; background:#e5e7eb; border:none; cursor:pointer; position:relative; transition:background 0.2s; flex-shrink:0;'"
@@ -334,6 +335,7 @@
 
             <!-- 탈퇴 버튼 -->
             <button
+              @click="handleDeleteAccount"
               :disabled="deleteConfirm !== '모든 내용을 확인하였습니다'"
               :style="deleteConfirm === '모든 내용을 확인하였습니다'
                 ? 'width:100%; padding:13px; border-radius:12px; border:none; background:#ef4444; color:#fff; font-size:15px; font-weight:700; cursor:pointer;'
@@ -348,28 +350,35 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { getUser, updateUser, changePassword, updatePrivacy, deleteUser } from '../api/user.js'
+import { userId, clearAuth } from '../store/auth.js'
 
+const router = useRouter()
 const activeMenu = ref('profile')
+const user = ref({})
 
-const user = {
-  name: '김개발',
-  nickname: '@kimdev',
-  university: '가천대학교',
-  department: '컴퓨터공학과',
-  email: 'kimdev@gachon.ac.kr',
-  joinedAt: '2024년 3월 15일',
-  techStack: ['React', 'Spring', 'AI/ML', 'Android', 'Unity'],
+onMounted(async () => {
+  if (!userId.value) return
+  try {
+    user.value = await getUser(userId.value)
+    editBio.value = user.value.bio ?? ''
+    editSelectedTech.value = [...(user.value.techStacks ?? [])]
+    editGithub.value = user.value.githubUrl?.replace('https://github.com/', '') ?? ''
+    editBlog.value = user.value.blogUrl ?? ''
+    editPortfolio.value = user.value.portfolioUrl ?? ''
+    privacyItems[0].enabled = user.value.isProjectPublic ?? true
+    privacyItems[1].enabled = user.value.isProfilePublic ?? true
+    privacyItems[2].enabled = user.value.isActivityPublic ?? false
+  } catch {}
+})
+
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
 }
-
-const profileItems = [
-  { label: '이름', value: user.name },
-  { label: '닉네임', value: user.nickname },
-  { label: '학교', value: user.university },
-  { label: '학과', value: user.department },
-  { label: '이메일', value: user.email, badge: true },
-  { label: '가입일', value: user.joinedAt },
-]
 
 const menus = [
   {
@@ -378,7 +387,7 @@ const menus = [
     iconActive: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.333" r="2.667" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.667 14.667c0-2.946 2.388-5.334 5.333-5.334s5.333 2.388 5.333 5.334" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   },
   {
-    key: 'edit', label: '프로필 수정',
+    key: 'edit', label: '포트폴리오',
     icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L4.667 14H2v-2.667L11.333 2z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     iconActive: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L4.667 14H2v-2.667L11.333 2z" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   },
@@ -408,12 +417,47 @@ const techOptions = [
   'Docker', 'Kubernetes', 'AWS', 'Firebase'
 ]
 
-// 프로필 수정
+// 개인정보 인라인 편집
+const profileEditing = ref(false)
+const editName = ref('')
+const editSchool = ref('')
+const editDepartment = ref('')
+const profileEditMsg = ref('')
+
+function startProfileEdit() {
+  editName.value = user.value.name ?? ''
+  editSchool.value = user.value.school ?? ''
+  editDepartment.value = user.value.department ?? ''
+  profileEditing.value = true
+}
+
+async function saveBasicProfile() {
+  profileEditMsg.value = ''
+  try {
+    const updated = await updateUser(userId.value, userId.value, {
+      name: editName.value,
+      school: editSchool.value,
+      department: editDepartment.value,
+      techStacks: user.value.techStacks ?? [],
+      bio: user.value.bio ?? '',
+      githubUrl: user.value.githubUrl ?? '',
+      blogUrl: user.value.blogUrl ?? '',
+      portfolioUrl: user.value.portfolioUrl ?? '',
+    })
+    user.value = updated
+    profileEditing.value = false
+  } catch {
+    profileEditMsg.value = '저장에 실패했습니다.'
+  }
+}
+
+// 포트폴리오 수정
 const editBio = ref('')
-const editSelectedTech = ref([...user.techStack])
+const editSelectedTech = ref([])
 const editGithub = ref('')
 const editBlog = ref('')
 const editPortfolio = ref('')
+const editMsg = ref('')
 
 function toggleEditTech(tag) {
   if (editSelectedTech.value.includes(tag)) {
@@ -423,10 +467,49 @@ function toggleEditTech(tag) {
   }
 }
 
+async function saveProfile() {
+  editMsg.value = ''
+  try {
+    const updated = await updateUser(userId.value, userId.value, {
+      name: user.value.name,
+      school: user.value.school,
+      department: user.value.department,
+      techStacks: editSelectedTech.value,
+      bio: editBio.value,
+      githubUrl: editGithub.value ? `https://github.com/${editGithub.value}` : '',
+      blogUrl: editBlog.value,
+      portfolioUrl: editPortfolio.value,
+    })
+    user.value = updated
+    editMsg.value = '저장되었습니다.'
+    setTimeout(() => { editMsg.value = ''; activeMenu.value = 'profile' }, 1000)
+  } catch {
+    editMsg.value = '저장에 실패했습니다.'
+  }
+}
+
 // 계정 보안
 const currentPw = ref('')
 const newPw = ref('')
 const confirmPw = ref('')
+const pwMsg = ref('')
+
+async function handleChangePassword() {
+  pwMsg.value = ''
+  if (newPw.value !== confirmPw.value) { pwMsg.value = '새 비밀번호가 일치하지 않아요.'; return }
+  try {
+    await changePassword(userId.value, {
+      currentPassword: currentPw.value,
+      newPassword: newPw.value,
+      confirmPassword: confirmPw.value,
+    })
+    currentPw.value = ''; newPw.value = ''; confirmPw.value = ''
+    pwMsg.value = '비밀번호가 변경되었습니다.'
+    setTimeout(() => { pwMsg.value = '' }, 2000)
+  } catch (e) {
+    pwMsg.value = e?.response?.status === 401 ? '현재 비밀번호가 올바르지 않아요.' : '변경에 실패했습니다.'
+  }
+}
 
 // 공개 범위
 const privacyItems = reactive([
@@ -435,6 +518,27 @@ const privacyItems = reactive([
   { title: '활동 기록 공개', desc: '댓글, 리뷰, 팀 지원 등 활동 내역을 공개해요', enabled: false },
 ])
 
+async function togglePrivacy(item) {
+  item.enabled = !item.enabled
+  try {
+    await updatePrivacy(userId.value, {
+      isProjectPublic: privacyItems[0].enabled,
+      isProfilePublic: privacyItems[1].enabled,
+      isActivityPublic: privacyItems[2].enabled,
+    })
+  } catch {
+    item.enabled = !item.enabled
+  }
+}
+
 // 회원 탈퇴
 const deleteConfirm = ref('')
+
+async function handleDeleteAccount() {
+  try {
+    await deleteUser(userId.value, userId.value)
+    clearAuth()
+    router.push('/login')
+  } catch {}
+}
 </script>

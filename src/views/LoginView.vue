@@ -168,15 +168,42 @@
               v-model="signupEmail"
               type="email"
               placeholder="your@university.ac.kr"
+              :disabled="emailVerified"
               class="flex-1 rounded-xl text-sm outline-none transition"
               style="height: 44px; padding: 4px 12px; background: #F9FAFB; color: #111827"
             />
             <button
+              v-if="!emailVerified"
               type="button"
+              @click="handleSendCode"
+              :disabled="!signupEmail || sendLoading"
               class="rounded-xl text-sm font-medium transition hover:opacity-90"
-              style="height: 44px; padding-left: 21px; padding-right: 21px; border: 1.5px solid #e5e7eb; color: #374151; white-space: nowrap"
-            >인증</button>
+              style="height: 44px; padding-left: 16px; padding-right: 16px; border: 1.5px solid #e5e7eb; color: #374151; white-space: nowrap; cursor: pointer;"
+            >{{ sendLoading ? '발송중...' : codeSent ? '재발송' : '인증' }}</button>
+            <span v-else style="height:44px; display:flex; align-items:center; gap:4px; font-size:13px; color:#10b981; font-weight:600; white-space:nowrap;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.5 4.5L6.5 11.5 2.5 7.5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              인증완료
+            </span>
           </div>
+          <!-- 코드 입력 -->
+          <div v-if="codeSent && !emailVerified" class="flex gap-2 mt-2">
+            <input
+              v-model="verifyInput"
+              type="text"
+              placeholder="6자리 인증 코드"
+              maxlength="6"
+              class="flex-1 rounded-xl text-sm outline-none transition"
+              style="height: 40px; padding: 4px 12px; background: #F9FAFB; color: #111827; border: 1.5px solid #c7d2fe;"
+            />
+            <button
+              type="button"
+              @click="handleVerifyCode"
+              :disabled="verifyInput.length < 6 || verifyLoading"
+              class="rounded-xl text-sm font-medium transition hover:opacity-90"
+              style="height: 40px; padding: 0 16px; background: #6366f1; color: #fff; border: none; cursor: pointer; white-space: nowrap;"
+            >{{ verifyLoading ? '확인중...' : '확인' }}</button>
+          </div>
+          <p v-if="verifyError" style="font-size:12px; color:#ef4444; margin-top:4px;">{{ verifyError }}</p>
 
           <!-- 공백 -->
           <div class="h-[15px]"></div>
@@ -222,8 +249,9 @@
           <p v-if="signupError" style="color:#ef4444; font-size:13px; margin-bottom:8px;">{{ signupError }}</p>
           <button
             type="submit"
+            :disabled="!emailVerified"
             class="w-[400px] h-[44px] rounded-xl text-white text-sm font-semibold transition hover:opacity-90 active:scale-[0.98]"
-            style="background: #6366f1"
+            :style="`background: ${emailVerified ? '#6366f1' : '#c7d2fe'}; cursor: ${emailVerified ? 'pointer' : 'not-allowed'}`"
           >회원가입</button>
         </div>
         </form>
@@ -235,7 +263,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { login, signup } from '../api/user.js'
+import { login, signup, sendVerificationCode, verifyCode } from '../api/user.js'
 import { setAuth } from '../store/auth.js'
 
 const router = useRouter()
@@ -257,6 +285,45 @@ const signupError = ref('')
 const techOptions = ['React', 'Spring', 'Android', 'Unity', 'Python', 'Vue', 'Flutter', 'Node.js', 'Swift', 'Kotlin']
 const selectedTech = ref([])
 
+// 이메일 인증
+const codeSent = ref(false)
+const emailVerified = ref(false)
+const verifyInput = ref('')
+const verifyError = ref('')
+const sendLoading = ref(false)
+const verifyLoading = ref(false)
+
+async function handleSendCode() {
+  if (!signupEmail.value) return
+  sendLoading.value = true
+  verifyError.value = ''
+  try {
+    await sendVerificationCode(signupEmail.value)
+    codeSent.value = true
+    emailVerified.value = false
+    verifyInput.value = ''
+  } catch {
+    verifyError.value = '코드 발송에 실패했습니다. 이메일을 확인해주세요.'
+  } finally {
+    sendLoading.value = false
+  }
+}
+
+async function handleVerifyCode() {
+  if (!verifyInput.value) return
+  verifyLoading.value = true
+  verifyError.value = ''
+  try {
+    await verifyCode(signupEmail.value, verifyInput.value)
+    emailVerified.value = true
+    codeSent.value = false
+  } catch {
+    verifyError.value = '인증 코드가 올바르지 않거나 만료되었습니다.'
+  } finally {
+    verifyLoading.value = false
+  }
+}
+
 function toggleTech(tag) {
   if (selectedTech.value.includes(tag)) {
     selectedTech.value = selectedTech.value.filter(t => t !== tag)
@@ -272,6 +339,9 @@ async function handleLogin() {
     console.log('[로그인 응답]', data)
     setAuth(data.token, data.userId)
     if (data.name) localStorage.setItem('userName', data.name)
+    if (data.school) localStorage.setItem('userSchool', data.school)
+    if (data.department) localStorage.setItem('userDepartment', data.department)
+    if (data.techStacks) localStorage.setItem('userTechStacks', JSON.stringify(data.techStacks))
     router.push('/')
   } catch (e) {
     loginError.value = '이메일 또는 비밀번호가 올바르지 않습니다.'
@@ -292,6 +362,7 @@ async function handleSignup() {
     activeTab.value = 'login'
     email.value = signupEmail.value
   } catch (e) {
+    console.error('[회원가입 실패]', e?.response?.status, e?.response?.data)
     signupError.value = '회원가입에 실패했습니다. 다시 시도해주세요.'
   }
 }

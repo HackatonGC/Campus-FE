@@ -151,21 +151,20 @@
       <!-- 메인 -->
       <main style="flex:1; min-width:0;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
-          <span style="font-size:14px; color:#9ca3af;">{{ filteredProjects.length }}개의 프로젝트</span>
-          <select style="font-size:13px; color:#374151; border:1px solid #e5e7eb; border-radius:8px; padding:6px 12px; background:#fff; outline:none; cursor:pointer;">
-            <option>최신순</option>
-            <option>인기순</option>
-            <option>조회순</option>
+          <span style="font-size:14px; color:#9ca3af;">{{ projects.length }}개의 프로젝트</span>
+          <select v-model="sortOrder" style="font-size:13px; color:#374151; border:1px solid #e5e7eb; border-radius:8px; padding:6px 12px; background:#fff; outline:none; cursor:pointer;">
+            <option value="latest">최신순</option>
+            <option value="popular">인기순</option>
           </select>
         </div>
 
-        <div v-if="filteredProjects.length === 0" style="text-align:center; color:#9ca3af; padding:80px 0; font-size:14px;">
+        <div v-if="projects.length === 0" style="text-align:center; color:#9ca3af; padding:80px 0; font-size:14px;">
           조건에 맞는 프로젝트가 없어요.
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
           <div
-            v-for="project in filteredProjects"
+            v-for="project in projects"
             :key="project.id"
             style="background:#fff; border-radius:16px; border:1px solid #e5e7eb; overflow:hidden; display:flex; flex-direction:column; transition:box-shadow 0.2s;"
             @mouseenter="e => e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.1)'"
@@ -246,9 +245,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { techOptions } from '../data/dummy.js'
-import { getProjects } from '../api/project.js'
+import { getProjects, getPopularTags } from '../api/project.js'
 import { isLoggedIn, clearAuth } from '../store/auth.js'
 import iconBookmark from '../assets/Icon (10).svg'
 import iconLike     from '../assets/Icon (9).svg'
@@ -274,8 +273,31 @@ onUnmounted(() => document.removeEventListener('click', closeProfile))
 const searchQuery = ref('')
 const selectedTags = ref([])
 const onlyRecruiting = ref(false)
+const sortOrder = ref('latest')
 const toast = ref({ show: false, message: '' })
 const projects = ref([])
+const popularTags = ref([])
+
+async function fetchProjects() {
+  const params = {}
+  if (searchQuery.value) params.keyword = searchQuery.value
+  if (selectedTags.value.length) params.techStack = selectedTags.value
+  if (onlyRecruiting.value) params.recruitingOnly = true
+  if (sortOrder.value) params.sort = sortOrder.value
+  try {
+    const data = await getProjects(params)
+    projects.value = Array.isArray(data) ? data : []
+  } catch {
+    projects.value = []
+  }
+}
+
+let searchTimer = null
+watch(searchQuery, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(fetchProjects, 300)
+})
+watch([selectedTags, onlyRecruiting, sortOrder], fetchProjects)
 
 onMounted(async () => {
   if (history.state?.registered) {
@@ -283,41 +305,20 @@ onMounted(async () => {
     setTimeout(() => { toast.value.show = false }, 3000)
     history.replaceState({}, '')
   }
+  fetchProjects()
   try {
-    const data = await getProjects()
-    projects.value = Array.isArray(data) ? data : []
+    const tags = await getPopularTags()
+    popularTags.value = Array.isArray(tags) ? tags : []
   } catch {
-    projects.value = []
+    popularTags.value = ['React', 'Spring Boot', 'TypeScript', 'Python', 'Flutter']
   }
 })
-
-const popularTags = ['React', 'Spring', 'AI/ML', 'Android', 'Unity']
 
 function toggleTag(tag) {
   const idx = selectedTags.value.indexOf(tag)
   if (idx === -1) selectedTags.value.push(tag)
   else selectedTags.value.splice(idx, 1)
 }
-
-const filteredProjects = computed(() => {
-  return projects.value.filter(p => {
-    const q = searchQuery.value.replace(/\s/g, '').toLowerCase()
-    const stacks = p.techStacks ?? p.techStack ?? []
-    const matchesSearch = !q ||
-      (p.title ?? '').replace(/\s/g, '').toLowerCase().includes(q) ||
-      (p.summary ?? '').replace(/\s/g, '').toLowerCase().includes(q) ||
-      stacks.some(t => t.replace(/\s/g, '').toLowerCase().includes(q))
-
-    const matchesTags = selectedTags.value.length === 0 ||
-      selectedTags.value.some(tag =>
-        stacks.some(t => t.toLowerCase().includes(tag.toLowerCase()))
-      )
-
-    const matchesRecruiting = !onlyRecruiting.value || p.status === 'RECRUITING'
-
-    return matchesSearch && matchesTags && matchesRecruiting
-  })
-})
 </script>
 
 <style scoped>
