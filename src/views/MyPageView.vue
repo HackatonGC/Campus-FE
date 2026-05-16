@@ -134,7 +134,7 @@
           <div style="display:flex; flex-direction:column; gap:16px;">
             <div v-for="p in appliedProjects" :key="p.id" style="padding:16px; border:1px solid #f3f4f6; border-radius:12px;">
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                <span style="font-size:15px; font-weight:700; color:#111827;">{{ p.title }}</span>
+                <span style="font-size:15px; font-weight:700; color:#111827;">{{ p.projectTitle }}</span>
                 <span :style="p.status === 'PENDING'
                   ? 'font-size:11px; background:#fef3c7; color:#d97706; padding:2px 8px; border-radius:999px; font-weight:600; flex-shrink:0;'
                   : p.status === 'ACCEPTED'
@@ -143,18 +143,18 @@
                   {{ p.status === 'PENDING' ? '검토중' : p.status === 'ACCEPTED' ? '승인됨' : '거절됨' }}
                 </span>
               </div>
-              <p style="font-size:13px; color:#6b7280; margin:0 0 10px;">{{ p.summary }}</p>
+              <p style="font-size:13px; color:#6b7280; margin:0 0 10px;">{{ p.projectSummary }}</p>
               <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                <span v-for="tech in p.techStack" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
+                <span v-for="tech in (p.techStacks ?? [])" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="font-size:12px; color:#9ca3af; display:flex; gap:12px;">
-                  <span>👤 {{ p.author }}</span>
-                  <span>🏷 {{ p.role }} 지원</span>
-                  <span>🕐 {{ p.date }}</span>
+                  <span>👤 {{ p.projectAuthorName }}</span>
+                  <span v-if="p.role">🏷 {{ p.role }} 지원</span>
+                  <span>🕐 {{ p.createdAt?.slice(0,10) }}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                  <RouterLink :to="`/project/${p.id}`" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; text-decoration:none; font-weight:500;">게시글 보기</RouterLink>
+                  <RouterLink :to="`/project/${p.projectId}`" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; text-decoration:none; font-weight:500;">게시글 보기</RouterLink>
                   <button v-if="p.status === 'PENDING'" @click="handleCancelApplication(p.projectId, p.id)" style="font-size:13px; padding:5px 14px; border-radius:8px; border:1px solid #fee2e2; background:#fff; color:#ef4444; cursor:pointer; font-weight:500;">지원 취소</button>
                 </div>
               </div>
@@ -294,8 +294,11 @@ onMounted(async () => {
 
   try {
     const data = await getMyApplications()
+    console.log('[내 신청 목록]', data)
     appliedProjects.value = Array.isArray(data) ? data : []
-  } catch {}
+  } catch (e) {
+    console.error('[내 신청 목록 실패]', e?.response?.status, e?.response?.data)
+  }
 })
 
 async function handleCancelApplication(projectId, applicationId) {

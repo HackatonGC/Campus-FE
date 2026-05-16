@@ -18,8 +18,14 @@ export const logout = () =>
 export const getUser = (id) =>
   api.get(`/api/v1/users/${id}`)
 
-export const updateUser = (id, requesterId, body) =>
-  api.put(`/api/v1/users/${id}`, body, { params: { requesterId } })
+export const updateUser = (id, body) =>
+  api.put(`/api/v1/users/${id}`, body)
+
+export const getPortfolio = (id) =>
+  api.get(`/api/v1/users/${id}/portfolio`)
+
+export const updatePortfolio = (id, body) =>
+  api.put(`/api/v1/users/${id}/portfolio`, body)
 
 export const changePassword = (id, body) =>
   api.patch(`/api/v1/users/${id}/password`, body)
@@ -27,5 +33,5 @@ export const changePassword = (id, body) =>
 export const updatePrivacy = (id, body) =>
   api.put(`/api/v1/users/${id}/privacy`, body)
 
-export const deleteUser = (id, requesterId) =>
-  api.delete(`/api/v1/users/${id}`, { params: { requesterId } })
+export const deleteUser = (id) =>
+  api.delete(`/api/v1/users/${id}`)

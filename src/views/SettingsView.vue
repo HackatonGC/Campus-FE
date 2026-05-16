@@ -352,7 +352,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getUser, updateUser, changePassword, updatePrivacy, deleteUser } from '../api/user.js'
+import { getUser, updateUser, getPortfolio, updatePortfolio, changePassword, updatePrivacy, deleteUser } from '../api/user.js'
 import { userId, clearAuth } from '../store/auth.js'
 
 const router = useRouter()
@@ -363,14 +363,18 @@ onMounted(async () => {
   if (!userId.value) return
   try {
     user.value = await getUser(userId.value)
-    editBio.value = user.value.bio ?? ''
-    editSelectedTech.value = [...(user.value.techStacks ?? [])]
-    editGithub.value = user.value.githubUrl?.replace('https://github.com/', '') ?? ''
-    editBlog.value = user.value.blogUrl ?? ''
-    editPortfolio.value = user.value.portfolioUrl ?? ''
     privacyItems[0].enabled = user.value.isProjectPublic ?? true
     privacyItems[1].enabled = user.value.isProfilePublic ?? true
     privacyItems[2].enabled = user.value.isActivityPublic ?? false
+  } catch {}
+  try {
+    const portfolio = await getPortfolio(userId.value)
+    editBio.value = portfolio.bio ?? ''
+    editSelectedTech.value = [...(portfolio.techStacks ?? [])]
+    editGithub.value = portfolio.githubUrl?.replace('https://github.com/', '') ?? ''
+    editBlog.value = portfolio.blogUrl ?? ''
+    editPortfolio.value = portfolio.portfolioUrl ?? ''
+    user.value = { ...user.value, ...portfolio }
   } catch {}
 })
 
@@ -434,17 +438,12 @@ function startProfileEdit() {
 async function saveBasicProfile() {
   profileEditMsg.value = ''
   try {
-    const updated = await updateUser(userId.value, userId.value, {
+    const updated = await updateUser(userId.value, {
       name: editName.value,
       school: editSchool.value,
       department: editDepartment.value,
-      techStacks: user.value.techStacks ?? [],
-      bio: user.value.bio ?? '',
-      githubUrl: user.value.githubUrl ?? '',
-      blogUrl: user.value.blogUrl ?? '',
-      portfolioUrl: user.value.portfolioUrl ?? '',
     })
-    user.value = updated
+    user.value = { ...user.value, ...updated }
     profileEditing.value = false
   } catch {
     profileEditMsg.value = '저장에 실패했습니다.'
@@ -470,20 +469,18 @@ function toggleEditTech(tag) {
 async function saveProfile() {
   editMsg.value = ''
   try {
-    const updated = await updateUser(userId.value, userId.value, {
-      name: user.value.name,
-      school: user.value.school,
-      department: user.value.department,
-      techStacks: editSelectedTech.value,
+    const updated = await updatePortfolio(userId.value, {
       bio: editBio.value,
       githubUrl: editGithub.value ? `https://github.com/${editGithub.value}` : '',
       blogUrl: editBlog.value,
       portfolioUrl: editPortfolio.value,
+      techStacks: editSelectedTech.value,
     })
-    user.value = updated
+    user.value = { ...user.value, ...updated }
     editMsg.value = '저장되었습니다.'
-    setTimeout(() => { editMsg.value = ''; activeMenu.value = 'profile' }, 1000)
-  } catch {
+    setTimeout(() => { editMsg.value = '' }, 1500)
+  } catch (e) {
+    console.error('[포트폴리오 저장 실패]', e?.response?.status, e?.response?.data)
     editMsg.value = '저장에 실패했습니다.'
   }
 }
@@ -507,7 +504,7 @@ async function handleChangePassword() {
     pwMsg.value = '비밀번호가 변경되었습니다.'
     setTimeout(() => { pwMsg.value = '' }, 2000)
   } catch (e) {
-    pwMsg.value = e?.response?.status === 401 ? '현재 비밀번호가 올바르지 않아요.' : '변경에 실패했습니다.'
+    pwMsg.value = e?.response?.status === 400 ? '현재 비밀번호가 올바르지 않아요.' : '변경에 실패했습니다.'
   }
 }
 
@@ -536,7 +533,7 @@ const deleteConfirm = ref('')
 
 async function handleDeleteAccount() {
   try {
-    await deleteUser(userId.value, userId.value)
+    await deleteUser(userId.value)
     clearAuth()
     router.push('/login')
   } catch {}

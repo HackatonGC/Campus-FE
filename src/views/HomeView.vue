@@ -109,6 +109,24 @@
       </div>
     </div>
 
+    <!-- ===== 검색 통계 ===== -->
+    <div v-if="searchQuery" style="background:#f4f4fd; padding:24px 40px 0;">
+      <div style="max-width:1280px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+        <div style="background:#fff; border-radius:16px; padding:24px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="font-size:32px; font-weight:800; color:#6366f1; margin-bottom:4px;">{{ projects.length }}</div>
+          <div style="font-size:13px; color:#6b7280;">검색 결과</div>
+        </div>
+        <div style="background:#fff; border-radius:16px; padding:24px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="font-size:32px; font-weight:800; color:#10b981; margin-bottom:4px;">{{ projects.filter(p => p.status === 'RECRUITING').length }}</div>
+          <div style="font-size:13px; color:#6b7280;">팀원 모집중</div>
+        </div>
+        <div style="background:#fff; border-radius:16px; padding:24px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="font-size:32px; font-weight:800; color:#9ca3af; margin-bottom:4px;">{{ projects.filter(p => p.status !== 'RECRUITING').length }}</div>
+          <div style="font-size:13px; color:#6b7280;">완료된 프로젝트</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== BODY ===== -->
     <div style="max-width:1280px; margin:0 auto; padding:40px 40px 60px; display:flex; gap:32px; align-items:flex-start;">
 

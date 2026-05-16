@@ -106,7 +106,7 @@
               <div style="flex:1; min-width:0;">
                 <!-- 이름 + 상태 -->
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                  <span style="font-size:15px; font-weight:700; color:#111827;">{{ a.name }}</span>
+                  <span style="font-size:15px; font-weight:700; color:#111827;">{{ a.userName }}</span>
                   <span :style="a.status === 'PENDING'
                     ? 'font-size:11px; background:#fef3c7; color:#d97706; padding:2px 8px; border-radius:999px; font-weight:600;'
                     : a.status === 'ACCEPTED'
@@ -116,18 +116,17 @@
                   </span>
                 </div>
                 <!-- 소속 -->
-                <div style="font-size:13px; color:#6b7280; margin-bottom:8px;">{{ a.university }} · {{ a.department }}</div>
                 <!-- 자기소개 -->
-                <p style="font-size:13px; color:#374151; margin:0 0 10px; line-height:1.6;">{{ a.introduction }}</p>
+                <p style="font-size:13px; color:#374151; margin:0 0 10px; line-height:1.6;">{{ a.message }}</p>
                 <!-- 기술 스택 -->
                 <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                  <span v-for="(tech, i) in a.techStack.slice(0,3)" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
-                  <span v-if="a.techStack.length > 3" style="font-size:12px; background:#f3f4f6; color:#6b7280; padding:2px 8px; border-radius:999px;">+{{ a.techStack.length - 3 }}</span>
+                  <span v-for="tech in (a.techStacks ?? []).slice(0,3)" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
+                  <span v-if="(a.techStacks ?? []).length > 3" style="font-size:12px; background:#f3f4f6; color:#6b7280; padding:2px 8px; border-radius:999px;">+{{ a.techStacks.length - 3 }}</span>
                 </div>
                 <!-- 지원 정보 -->
                 <div style="display:flex; align-items:center; gap:16px; font-size:12px; color:#9ca3af; margin-bottom:10px;">
-                  <span>{{ a.role }} 지원</span>
-                  <span>{{ a.date }}</span>
+                  <span v-if="a.role">{{ a.role }} 지원</span>
+                  <span>{{ a.createdAt?.slice(0,10) }}</span>
                 </div>
                 <!-- 링크 -->
                 <div style="display:flex; gap:12px;">
