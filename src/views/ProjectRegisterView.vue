@@ -32,6 +32,23 @@
       <section style="background:#fff; border-radius:16px; border:1px solid #e5e7eb; padding:32px; margin-bottom:20px;">
         <h2 style="font-size:17px; font-weight:700; color:#111827; margin:0 0 24px;">기본 정보</h2>
 
+        <!-- 썸네일 이미지 -->
+        <div style="margin-bottom:24px;">
+          <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">대표 이미지</label>
+          <label style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:180px; border-radius:12px; border:2px dashed #c7d2fe; background:#f5f5ff; cursor:pointer; overflow:hidden; position:relative;">
+            <img v-if="thumbnailPreview" :src="thumbnailPreview" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;" />
+            <div v-else style="display:flex; flex-direction:column; align-items:center; gap:8px; color:#818cf8;">
+              <svg style="width:32px; height:32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span style="font-size:14px; color:#6366f1; font-weight:500;">{{ thumbnailUploading ? '업로드 중...' : '클릭하여 이미지 업로드' }}</span>
+              <span style="font-size:12px; color:#9ca3af;">PNG, JPG, WebP 지원</span>
+            </div>
+            <input type="file" accept="image/*" style="display:none;" @change="onThumbnailChange" :disabled="thumbnailUploading" />
+          </label>
+          <p v-if="thumbnailPreview" style="font-size:12px; color:#6366f1; margin-top:6px; cursor:pointer;" @click="thumbnailPreview=''; form.thumbnailUrl=''">✕ 이미지 제거</p>
+        </div>
+
         <div style="margin-bottom:20px;">
           <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">
             프로젝트 제목 <span style="color:#6366f1;">*</span>
@@ -363,6 +380,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import iconLogo from '../assets/Icon.svg'
+import { uploadImage } from '../utils/cloudinary.js'
+import { createProject } from '../api/project.js'
+import { userId } from '../store/auth.js'
 
 const DRAFT_KEY = 'stackmate_project_draft'
 const router = useRouter()
@@ -396,7 +416,27 @@ const form = reactive({
   status: 'recruiting',
   roles: [{ name: '', count: 1, description: '' }],
   body: defaultBody,
+  thumbnailUrl: '',
 })
+
+const thumbnailUploading = ref(false)
+const thumbnailPreview = ref('')
+
+async function onThumbnailChange(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  thumbnailUploading.value = true
+  try {
+    const url = await uploadImage(file)
+    form.thumbnailUrl = url
+    thumbnailPreview.value = url
+    showToast('이미지가 업로드됐습니다!')
+  } catch {
+    showToast('이미지 업로드에 실패했습니다')
+  } finally {
+    thumbnailUploading.value = false
+  }
+}
 
 const toast = reactive({ show: false, message: '' })
 const showDraftModal = ref(false)
@@ -494,15 +534,40 @@ function preview() {
   router.push('/project/preview')
 }
 
-function submit() {
+async function submit() {
   if (!form.title.trim()) return showToast('프로젝트 제목을 입력해주세요')
   if (!form.summary.trim()) return showToast('한 줄 소개를 입력해주세요')
   if (!form.description.trim()) return showToast('프로젝트 상세 설명을 입력해주세요')
   if (form.techStack.length === 0) return showToast('기술 스택을 하나 이상 선택해주세요')
   if (!form.body.trim()) return showToast('프로젝트 상세 내용을 입력해주세요')
 
-  localStorage.removeItem(DRAFT_KEY)
-  router.push({ path: '/', state: { registered: true } })
+  try {
+    const statusMap = { recruiting: 'RECRUITING', developing: 'DEVELOPING', done: 'COMPLETED' }
+    const payload = {
+      userId: Number(userId.value),
+      title: form.title,
+      summary: form.summary,
+      description: form.body,
+      techStacks: [...form.techStack],
+      status: statusMap[form.status] ?? 'RECRUITING',
+      projectType: form.roles.length > 0 ? 'TEAM' : 'INDIVIDUAL',
+      thumbnailUrl: form.thumbnailUrl || null,
+      githubUrl: form.githubUrl || null,
+      deployUrl: form.deployUrl || null,
+      figmaUrl: form.figmaUrl || null,
+      notionUrl: form.notionUrl || null,
+      recruitments: form.roles
+        .filter(r => r.name.trim())
+        .map(r => ({ role: r.name, count: r.count, description: r.description || null })),
+    }
+    console.log('[등록 payload]', payload)
+    await createProject(payload)
+    localStorage.removeItem(DRAFT_KEY)
+    router.push({ path: '/', state: { registered: true } })
+  } catch (e) {
+    console.error('[등록 실패]', e.response?.status, e.response?.data)
+    showToast('등록에 실패했습니다. 다시 시도해주세요.')
+  }
 }
 </script>
 

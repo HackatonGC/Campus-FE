@@ -1,4 +1,6 @@
-export const projects = [
+export const projects = []
+
+export const projects_backup = [
   {
     id: 1,
     title: '실시간 채팅 앱',

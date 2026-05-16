@@ -62,7 +62,7 @@
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.933 10a1.1 1.1 0 0 0 .22 1.213l.04.04a1.333 1.333 0 1 1-1.886 1.887l-.04-.04a1.1 1.1 0 0 0-1.214-.22 1.1 1.1 0 0 0-.666 1.006v.114a1.333 1.333 0 0 1-2.667 0v-.06A1.1 1.1 0 0 0 6 12.933a1.1 1.1 0 0 0-1.213.22l-.04.04a1.333 1.333 0 1 1-1.887-1.886l.04-.04A1.1 1.1 0 0 0 3.12 10a1.1 1.1 0 0 0-1.006-.667H2a1.333 1.333 0 0 1 0-2.666h.06A1.1 1.1 0 0 0 3.067 6a1.1 1.1 0 0 0-.22-1.213l-.04-.04a1.333 1.333 0 1 1 1.886-1.887l.04.04A1.1 1.1 0 0 0 6 3.12a1.1 1.1 0 0 0 .667-1.006V2a1.333 1.333 0 0 1 2.666 0v.06A1.1 1.1 0 0 0 10 3.067a1.1 1.1 0 0 0 1.213-.22l.04-.04a1.333 1.333 0 1 1 1.887 1.886l-.04.04A1.1 1.1 0 0 0 12.88 6a1.1 1.1 0 0 0 1.006.667H14a1.333 1.333 0 0 1 0 2.666h-.06a1.1 1.1 0 0 0-1.007.667z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
             설정
           </RouterLink>
-          <button style="background:none; color:#ef4444; border:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px;">
+          <button @click="handleLogout" style="background:none; color:#ef4444; border:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px;">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.667 11.333L14 8l-3.333-3.333M14 8H6M6.667 14H2.667C2.3 14 2 13.7 2 13.333V2.667C2 2.3 2.3 2 2.667 2h4" stroke="#ef4444" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
             로그아웃
           </button>
@@ -78,7 +78,7 @@
             <div style="width:40px; height:40px; border-radius:12px; margin:0 auto 10px; display:flex; align-items:center; justify-content:center;" :style="{background: stat.bgColor}">
               <span v-html="stat.icon"></span>
             </div>
-            <div style="font-size:22px; font-weight:700; color:#111827; margin-bottom:4px;">{{ stat.value }}</div>
+            <div style="font-size:22px; font-weight:700; color:#111827; margin-bottom:4px;">{{ stat.value.value }}</div>
             <div style="font-size:13px; color:#9ca3af;">{{ stat.label }}</div>
           </div>
         </div>
@@ -94,17 +94,15 @@
               <img :src="p.thumbnailUrl" style="width:220px; height:100%; min-height:160px; object-fit:cover; flex-shrink:0;" />
               <div style="flex:1; min-width:0; padding:16px;">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                  <span v-if="p.isRecruiting" style="font-size:11px; background:#10b981; color:#fff; padding:2px 8px; border-radius:999px; font-weight:600;">모집중</span>
+                  <span v-if="p.status === 'RECRUITING'" style="font-size:11px; background:#10b981; color:#fff; padding:2px 8px; border-radius:999px; font-weight:600;">모집중</span>
                   <span style="font-size:15px; font-weight:700; color:#111827;">{{ p.title }}</span>
                 </div>
                 <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-                  <span v-for="tech in p.techStack" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
+                  <span v-for="tech in (p.techStacks ?? p.techStack ?? [])" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px;">{{ tech }}</span>
                 </div>
                 <div style="font-size:12px; color:#9ca3af; display:flex; gap:12px; margin-bottom:10px;">
-                  <span>👁 {{ p.views }}</span>
-                  <span>❤️ {{ p.likes }}</span>
-                  <span>💬 {{ p.comments }}</span>
-                  <span>🕐 {{ p.date }}</span>
+                  <span>👁 {{ p.viewCount ?? p.views ?? 0 }}</span>
+                  <span>❤️ {{ p.likeCount ?? p.likes ?? 0 }}</span>
                 </div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                   <RouterLink :to="`/project/${p.id}/manage`" style="font-size:12px; padding:5px 14px; border-radius:8px; border:none; background:#6366f1; color:#fff; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:600; text-decoration:none;">
@@ -238,69 +236,55 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { getProjects } from '../api/project.js'
+import { userId, clearAuth } from '../store/auth.js'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const activeMenu = ref('projects')
 
 const user = {
-  name: '김개발',
-  university: '가천대학교',
-  department: '컴퓨터공학과',
-  techStack: ['React', 'Spring', 'AI/ML', 'Android', 'Unity'],
+  name: localStorage.getItem('userName') ?? '사용자',
+  university: localStorage.getItem('userSchool') ?? '',
+  department: localStorage.getItem('userDepartment') ?? '',
+  techStack: [],
 }
 
 const menus = [
-  {
-    key: 'projects', label: '내 프로젝트',
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/></svg>'
-  },
-  {
-    key: 'applied', label: '지원한 프로젝트',
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.333 14v-1.333A2.667 2.667 0 0 0 10.667 10H5.333A2.667 2.667 0 0 0 2.667 12.667V14M8 7.333A2.667 2.667 0 1 0 8 2a2.667 2.667 0 0 0 0 5.333z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-  },
-  {
-    key: 'bookmarks', label: '북마크',
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.333 1.333H4.667C4.3 1.333 4 1.633 4 2v12l4-2.667L12 14V2c0-.367-.3-.667-.667-.667z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-  },
-  {
-    key: 'likes', label: '좋아요',
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.893 3.107a3.667 3.667 0 0 0-5.18 0L8 3.813l-.713-.706a3.667 3.667 0 0 0-5.18 5.18L8 14.187l5.893-5.9a3.667 3.667 0 0 0 0-5.18z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-  },
+  { key: 'projects', label: '내 프로젝트', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/></svg>' },
+  { key: 'applied', label: '지원한 프로젝트', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.333 14v-1.333A2.667 2.667 0 0 0 10.667 10H5.333A2.667 2.667 0 0 0 2.667 12.667V14M8 7.333A2.667 2.667 0 1 0 8 2a2.667 2.667 0 0 0 0 5.333z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { key: 'bookmarks', label: '북마크', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.333 1.333H4.667C4.3 1.333 4 1.633 4 2v12l4-2.667L12 14V2c0-.367-.3-.667-.667-.667z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { key: 'likes', label: '좋아요', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.893 3.107a3.667 3.667 0 0 0-5.18 0L8 3.813l-.713-.706a3.667 3.667 0 0 0-5.18 5.18L8 14.187l5.893-5.9a3.667 3.667 0 0 0 0-5.18z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
 ]
 
 const stats = [
-  { label: '작성 프로젝트', value: 12, bgColor: '#ede9fe', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/></svg>' },
-  { label: '받은 좋아요', value: 156, bgColor: '#fce7f3', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.367 3.883a4.583 4.583 0 0 0-6.475 0L10 4.767l-.892-.884a4.583 4.583 0 0 0-6.475 6.475L10 17.733l7.367-7.375a4.583 4.583 0 0 0 0-6.475z" stroke="#ec4899" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-  { label: '코드 리뷰', value: 43, bgColor: '#dbeafe', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.5 13.333c0 .442-.176.866-.488 1.179-.313.312-.737.488-1.179.488H5.833L2.5 17.5V4.167c0-.442.176-.866.488-1.179C3.3 2.676 3.724 2.5 4.167 2.5h11.666c.442 0 .866.176 1.179.488.312.313.488.737.488 1.179v9.166z" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-  { label: '팀 참여', value: 8, bgColor: '#d1fae5', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.167 17.5v-1.667A3.333 3.333 0 0 0 10.833 12.5H4.167a3.333 3.333 0 0 0-3.334 3.333V17.5M19.167 17.5v-1.667a3.333 3.333 0 0 0-2.5-3.225M13.333 2.608a3.333 3.333 0 0 1 0 6.459M7.5 9.167a3.333 3.333 0 1 0 0-6.667 3.333 3.333 0 0 0 0 6.667z" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { label: '작성 프로젝트', value: ref(0), bgColor: '#ede9fe', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/></svg>' },
+  { label: '받은 좋아요', value: ref(0), bgColor: '#fce7f3', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.367 3.883a4.583 4.583 0 0 0-6.475 0L10 4.767l-.892-.884a4.583 4.583 0 0 0-6.475 6.475L10 17.733l7.367-7.375a4.583 4.583 0 0 0 0-6.475z" stroke="#ec4899" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { label: '코드 리뷰', value: ref(0), bgColor: '#dbeafe', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.5 13.333c0 .442-.176.866-.488 1.179-.313.312-.737.488-1.179.488H5.833L2.5 17.5V4.167c0-.442.176-.866.488-1.179C3.3 2.676 3.724 2.5 4.167 2.5h11.666c.442 0 .866.176 1.179.488.312.313.488.737.488 1.179v9.166z" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { label: '팀 참여', value: ref(0), bgColor: '#d1fae5', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.167 17.5v-1.667A3.333 3.333 0 0 0 10.833 12.5H4.167a3.333 3.333 0 0 0-3.334 3.333V17.5M19.167 17.5v-1.667a3.333 3.333 0 0 0-2.5-3.225M13.333 2.608a3.333 3.333 0 0 1 0 6.459M7.5 9.167a3.333 3.333 0 1 0 0-6.667 3.333 3.333 0 0 0 0 6.667z" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
 ]
 
-const myProjects = [
-  { id: 1, title: '실시간 채팅 앱', techStack: ['React', 'Spring Boot', 'WebSocket'], thumbnailUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&auto=format&fit=crop', isRecruiting: true, views: 243, likes: 42, comments: 12, date: '2024.05.10', githubUrl: '#', applicants: 2 },
-  { id: 2, title: 'AI 이미지 생성기', techStack: ['Python', 'FastAPI', 'TensorFlow'], thumbnailUrl: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&auto=format&fit=crop', isRecruiting: false, views: 187, likes: 38, comments: 8, date: '2024.04.25', githubUrl: '#', applicants: 0 },
-]
+const myProjects = ref([])
+const appliedProjects = ref([])
+const bookmarkedProjects = ref([])
+const likedProjects = ref([])
+const recentActivities = ref([])
 
-const appliedProjects = [
-  { id: 10, title: '블록체인 투표 시스템', summary: '블록체인 기반 투명한 전자 투표 플랫폼', techStack: ['React', 'Solidity', 'Web3.js'], status: '검토중', author: '박개발', role: 'Frontend', date: '2024.05.18' },
-  { id: 11, title: 'AI 학습 도우미', summary: 'AI를 활용한 개인 맞춤형 학습 플랫폼', techStack: ['Python', 'FastAPI', 'TensorFlow'], status: '승인됨', author: '최개발', role: 'Backend', date: '2024.05.15' },
-  { id: 12, title: '소셜 북마크 서비스', summary: '북마크를 공유하고 큐레이션하는 소셜 플랫폼', techStack: ['Next.js', 'GraphQL', 'PostgreSQL'], status: '거절됨', author: '정개발', role: 'Frontend', date: '2024.05.10' },
-]
+onMounted(async () => {
+  try {
+    const all = await getProjects()
+    const uid = String(userId.value)
+    myProjects.value = (Array.isArray(all) ? all : []).filter(p =>
+      String(p.userId) === uid || String(p.authorId) === uid
+    )
+    stats[0].value.value = myProjects.value.length
+    stats[1].value.value = myProjects.value.reduce((s, p) => s + (p.likeCount ?? 0), 0)
+  } catch {}
+})
 
-const bookmarkedProjects = [
-  { id: 3, title: '날씨 기반 옷차림 추천 앱', summary: '날씨 API와 AI를 활용한 옷차림 추천 서비스', techStack: ['React Native', 'Node.js', 'MongoDB'], isRecruiting: true, author: '박개발', views: 324, likes: 67, date: '2024.05.12' },
-  { id: 4, title: '개발자 커뮤니티 플랫폼', summary: '개발자들을 위한 Q&A 및 프로젝트 공유 플랫폼', techStack: ['Next.js', 'PostgreSQL', 'Prisma'], isRecruiting: true, author: '이개발', views: 512, likes: 89, date: '2024.05.08' },
-  { id: 5, title: '스마트 독서 기록 앱', summary: '독서 기록 및 독서 습관 추적 애플리케이션', techStack: ['Flutter', 'Firebase', 'ML Kit'], isRecruiting: false, author: '최개발', views: 201, likes: 45, date: '2024.04.30' },
-]
-
-const likedProjects = [
-  { id: 6, title: '실시간 코드 협업 툴', summary: '실시간으로 코드를 함께 작성하고 리뷰할 수 있는 협업 도구', techStack: ['Vue', 'Spring', 'Redis'], isRecruiting: true, author: '정개발', views: 445, likes: 103, date: '2024.05.15' },
-  { id: 7, title: 'AI 기반 이력서 분석기', summary: 'AI로 이력서를 분석하고 개선점을 제안하는 서비스', techStack: ['Python', 'Django', 'OpenAI API'], isRecruiting: true, author: '강개발', views: 389, likes: 92, date: '2024.05.11' },
-]
-
-const recentActivities = [
-  { text: '실시간 채팅 앱에 댓글을 작성했습니다', time: '2시간 전', bgColor: '#dbeafe', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 10.667c0 .354-.14.693-.39.943-.25.25-.59.39-.943.39H4.667L2 14V3.333c0-.353.14-.692.39-.942C2.64 2.14 2.98 2 3.333 2h9.334c.353 0 .693.14.943.39.25.25.39.59.39.943v7.334z" stroke="#3b82f6" stroke-width="1.33"/></svg>' },
-  { text: 'AI 이미지 생성기 프로젝트를 등록했습니다', time: '5시간 전', bgColor: '#ede9fe', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="#6366f1" stroke-width="1.33"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="#6366f1" stroke-width="1.33"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="#6366f1" stroke-width="1.33"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="#6366f1" stroke-width="1.33"/></svg>' },
-  { text: 'Android 쇼핑몰 앱 팀에 지원했습니다', time: '1일 전', bgColor: '#d1fae5', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.333 14v-1.333A2.667 2.667 0 0 0 10.667 10H5.333A2.667 2.667 0 0 0 2.667 12.667V14M8 7.333A2.667 2.667 0 1 0 8 2a2.667 2.667 0 0 0 0 5.333z" stroke="#10b981" stroke-width="1.33"/></svg>' },
-  { text: 'WebSocket 연결 구조 코드 리뷰를 요청했습니다', time: '2일 전', bgColor: '#dbeafe', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 10.667c0 .354-.14.693-.39.943-.25.25-.59.39-.943.39H4.667L2 14V3.333c0-.353.14-.692.39-.942C2.64 2.14 2.98 2 3.333 2h9.334c.353 0 .693.14.943.39.25.25.39.59.39.943v7.334z" stroke="#3b82f6" stroke-width="1.33"/></svg>' },
-]
+function handleLogout() {
+  clearAuth()
+  router.push('/login')
+}
 </script>
