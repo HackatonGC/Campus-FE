@@ -1,23 +1,7 @@
 <template>
   <div style="min-height:100vh; background:#f4f4fd;">
 
-    <!-- NAV -->
-    <nav style="background:#fff; border-bottom:1px solid #e5e7eb; position:sticky; top:0; z-index:50;">
-      <div style="max-width:1280px; margin:0 auto; padding:0 40px; height:68px; display:flex; align-items:center; justify-content:space-between;">
-        <RouterLink to="/" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
-          <div style="width:44px; height:44px; background:#6366f1; border-radius:12px; display:flex; align-items:center; justify-content:center;">
-            <img :src="iconLogo" style="width:28px; height:28px;" alt="StackMate" />
-          </div>
-          <div>
-            <div style="font-weight:700; font-size:16px; line-height:1.2; background:linear-gradient(to right,#6366F1,rgba(99,102,241,0.7)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">StackMate</div>
-            <div style="color:#9ca3af; font-size:11px; line-height:1.2;">함께 성장하는 개발자</div>
-          </div>
-        </RouterLink>
-        <button style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; background:none; border:none; cursor:pointer;">
-          로그인
-        </button>
-      </div>
-    </nav>
+    <NavBar />
 
     <!-- BODY -->
     <div style="max-width:800px; margin:0 auto; padding:48px 24px 120px;">
@@ -378,23 +362,17 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
-import iconLogo from '../assets/Icon.svg'
+import { useRouter } from 'vue-router'
+import NavBar from '../components/NavBar.vue'
 import { uploadImage } from '../utils/cloudinary.js'
+import { techOptions } from '../data/dummy.js'
 import { createProject } from '../api/project.js'
 import { userId } from '../store/auth.js'
 
 const DRAFT_KEY = 'stackmate_project_draft'
 const router = useRouter()
 
-const allTechOptions = [
-  'React', 'Next.js', 'Vue', 'Angular',
-  'Spring', 'Spring Boot', 'Node.js', 'Express', 'Django', 'FastAPI',
-  'Android', 'iOS', 'Flutter', 'React Native',
-  'Unity', 'Unreal', 'AI/ML', 'TensorFlow', 'PyTorch',
-  'MySQL', 'PostgreSQL', 'MongoDB', 'Redis',
-  'Docker', 'Kubernetes', 'AWS', 'Firebase',
-]
+const allTechOptions = techOptions
 
 const statusOptions = [
   { value: 'recruiting', label: '모집중', color: '#10b981' },

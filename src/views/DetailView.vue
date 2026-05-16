@@ -1,26 +1,7 @@
 <template>
   <div style="min-height:100vh; background:#FAFBFF;">
 
-    <!-- NAV -->
-    <nav style="background:#fff; border-bottom:1px solid rgba(99,102,241,0.15); position:sticky; top:0; z-index:50; width:100%;">
-      <div style="max-width:1280px; margin:0 auto; padding:0 40px; height:68px; display:flex; align-items:center; justify-content:space-between;">
-        <RouterLink to="/" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
-          <div style="width:44px; height:44px; background:#6366f1; border-radius:12px; display:flex; align-items:center; justify-content:center;">
-            <img :src="iconLogo" style="width:28px; height:28px;" alt="StackMate" />
-          </div>
-          <div>
-            <div style="font-weight:700; font-size:16px; line-height:1.2; background:linear-gradient(to right, #6366F1 0%, rgba(99,102,241,0.7) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">StackMate</div>
-            <div style="color:#9ca3af; font-size:11px; line-height:1.2;">함께 성장하는 개발자</div>
-          </div>
-        </RouterLink>
-        <button v-if="isLoggedIn" @click="clearAuth(); $router.push('/login')" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; background:none; border:none; cursor:pointer;">
-          <img :src="iconLogout" style="width:16px; height:16px;" alt="" /> 로그아웃
-        </button>
-        <RouterLink v-else to="/login" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; text-decoration:none;">
-          <img :src="iconLogout" style="width:16px; height:16px;" alt="" /> 로그인
-        </RouterLink>
-      </div>
-    </nav>
+    <NavBar />
 
     <div v-if="project">
 
@@ -217,9 +198,8 @@ import { useRoute } from 'vue-router'
 import { getProject, getComments, createComment, deleteComment, toggleCommentLike, addLike, removeLike, addBookmark, removeBookmark } from '../api/project.js'
 import { marked } from 'marked'
 
-import iconLogo   from '../assets/Icon.svg'
-import iconLogout from '../assets/Icon (4).svg'
 import { isLoggedIn, clearAuth, userId } from '../store/auth.js'
+import NavBar from '../components/NavBar.vue'
 import iconTeam    from '../assets/Icon (3).svg'
 import iconComment  from '../assets/Icon (7).svg'
 import iconLike     from '../assets/Icon (9).svg'

@@ -123,10 +123,9 @@ export const projects_backup = [
   },
 ]
 
-export const techOptions = [
-  'React', 'Spring', 'Android', 'Unity', 'Python',
-  'Django', 'Node.js', 'AI/ML', 'iOS', 'Flutter',
-]
+export const techOptions = ['JavaScript', 'TypeScript', 'React', 'Next.js', 'Vue', 'Nuxt.js', 'Spring Boot', 'Python', 'Django', 'FastAPI', 'Java', 'Kotlin', 'Node.js', 'Express', 'Flutter', 'Swift', 'Go', 'C++', 'CSS', 'Tailwind', 'Docker', 'Kubernetes', 'AWS', 'Git', 'SQL', 'MongoDB', 'Redis', 'GraphQL', 'Linux']
+
+export const categoryTags = ['디버깅', '에러', '환경설정', '배포', '테스트', '아이디어', '코드리뷰', '설계', '알고리즘', '성능', '보안', '협업', '취업', '학습', '기타']
 
 export const techColors = {
   'React': 'bg-blue-100 text-blue-700',

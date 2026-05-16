@@ -265,6 +265,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login, signup, sendVerificationCode, verifyCode } from '../api/user.js'
 import { setAuth } from '../store/auth.js'
+import { techOptions } from '../data/dummy.js'
 
 const router = useRouter()
 const activeTab = ref('login')
@@ -282,7 +283,6 @@ const signupDept = ref('')
 const signupEmail = ref('')
 const signupPassword = ref('')
 const signupError = ref('')
-const techOptions = ['React', 'Spring', 'Android', 'Unity', 'Python', 'Vue', 'Flutter', 'Node.js', 'Swift', 'Kotlin']
 const selectedTech = ref([])
 
 // 이메일 인증
