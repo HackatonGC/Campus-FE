@@ -4,59 +4,63 @@
     <NavBar />
 
     <!-- BODY -->
-    <div style="max-width:1280px; margin:0 auto; padding:32px 40px; display:grid; grid-template-columns:240px 1fr; gap:24px; align-items:start;">
+    <div style="max-width:1280px; margin:0 auto; padding:32px 40px; display:grid; grid-template-columns:280px 1fr; gap:24px; align-items:start;">
 
       <!-- SIDEBAR -->
-      <div style="background:#fff; border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+      <div style="background:#fff; border-radius:16px; padding:28px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
         <!-- 프로필 -->
-        <div style="display:flex; flex-direction:column; align-items:center; padding-bottom:20px; border-bottom:1px solid #f3f4f6;">
-          <div style="width:72px; height:72px; border-radius:50%; background:#f3f4f6; display:flex; align-items:center; justify-content:center; margin-bottom:12px; overflow:hidden;">
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="14" r="7" fill="#d1d5db"/><path d="M4 32c0-7.7 6.3-14 14-14s14 6.3 14 14" fill="#d1d5db"/></svg>
-          </div>
-          <div style="font-weight:700; font-size:16px; color:#111827; margin-bottom:4px;">{{ user.name }}</div>
+        <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding-bottom:24px; border-bottom:1px solid #f3f4f6;">
+          <div style="font-size:20px; font-weight:700; color:#111827; margin-bottom:4px;">{{ user.name }}</div>
           <div style="font-size:13px; color:#6b7280;">{{ user.university }}</div>
-          <div style="font-size:13px; color:#6b7280; margin-bottom:12px;">{{ user.department }}</div>
+          <div style="font-size:13px; color:#6b7280; margin-bottom:16px;">{{ user.department }}</div>
           <div style="width:100%;">
-            <div style="font-size:12px; color:#9ca3af; margin-bottom:8px;">관심 기술 스택</div>
-            <div style="display:flex; flex-wrap:wrap; gap:6px;">
-              <span v-for="tech in user.techStack" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:2px 8px; border-radius:999px; font-weight:500;">{{ tech }}</span>
+            <div style="font-size:12px; color:#9ca3af; margin-bottom:8px;">관심 기술스택</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
+              <span v-for="tech in user.techStack" :key="tech" style="font-size:12px; background:#ede9fe; color:#6366f1; padding:3px 10px; border-radius:999px; font-weight:500;">{{ tech }}</span>
+              <span v-if="!user.techStack.length" style="font-size:12px; color:#9ca3af;">없음</span>
             </div>
           </div>
         </div>
-        <!-- 메뉴 -->
-        <nav style="margin-top:16px; display:flex; flex-direction:column; gap:4px;">
-          <button v-for="menu in menus" :key="menu.key"
-            @click="activeMenu = menu.key"
-            :style="activeMenu === menu.key
-              ? 'background:#6366f1; color:#fff; border:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px;'
-              : 'background:none; color:#374151; border:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px;'"
-          >
-            <span v-html="menu.icon"></span>{{ menu.label }}
-          </button>
-          <div style="border-top:1px solid #f3f4f6; margin:8px 0;"></div>
-          <RouterLink to="/settings" style="background:none; color:#374151; text-decoration:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px;">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.933 10a1.1 1.1 0 0 0 .22 1.213l.04.04a1.333 1.333 0 1 1-1.886 1.887l-.04-.04a1.1 1.1 0 0 0-1.214-.22 1.1 1.1 0 0 0-.666 1.006v.114a1.333 1.333 0 0 1-2.667 0v-.06A1.1 1.1 0 0 0 6 12.933a1.1 1.1 0 0 0-1.213.22l-.04.04a1.333 1.333 0 1 1-1.887-1.886l.04-.04A1.1 1.1 0 0 0 3.12 10a1.1 1.1 0 0 0-1.006-.667H2a1.333 1.333 0 0 1 0-2.666h.06A1.1 1.1 0 0 0 3.067 6a1.1 1.1 0 0 0-.22-1.213l-.04-.04a1.333 1.333 0 1 1 1.886-1.887l.04.04A1.1 1.1 0 0 0 6 3.12a1.1 1.1 0 0 0 .667-1.006V2a1.333 1.333 0 0 1 2.666 0v.06A1.1 1.1 0 0 0 10 3.067a1.1 1.1 0 0 0 1.213-.22l.04-.04a1.333 1.333 0 1 1 1.887 1.886l-.04.04A1.1 1.1 0 0 0 12.88 6a1.1 1.1 0 0 0 1.006.667H14a1.333 1.333 0 0 1 0 2.666h-.06a1.1 1.1 0 0 0-1.007.667z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            설정
+
+        <!-- 활동 통계 -->
+        <div style="margin-top:20px; display:flex; flex-direction:column; gap:6px;">
+          <div style="border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; background:#f9fafb;">
+            <span style="font-size:12px; color:#6b7280; flex:1;">내 프로젝트</span>
+            <span style="font-size:16px; font-weight:600; color:#111827;">{{ myProjects.length }}</span>
+          </div>
+          <div style="border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; background:#f9fafb;">
+            <span style="font-size:12px; color:#6b7280; flex:1;">지원한 프로젝트</span>
+            <span style="font-size:16px; font-weight:600; color:#111827;">{{ appliedProjects.length }}</span>
+          </div>
+          <div style="border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; background:#f9fafb;">
+            <span style="font-size:12px; color:#6b7280; flex:1;">북마크</span>
+            <span style="font-size:16px; font-weight:600; color:#111827;">{{ bookmarkedProjects.length }}</span>
+          </div>
+          <div style="border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; background:#f9fafb;">
+            <span style="font-size:12px; color:#6b7280; flex:1;">좋아요</span>
+            <span style="font-size:16px; font-weight:600; color:#111827;">{{ likedProjects.length }}</span>
+          </div>
+        </div>
+
+        <!-- 프로필 수정 버튼 -->
+        <div style="margin-top:20px;">
+          <RouterLink to="/settings" style="display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:10px; border-radius:10px; border:1.5px solid #e5e7eb; font-size:13px; font-weight:600; color:#374151; text-decoration:none; box-sizing:border-box;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+            프로필 수정
           </RouterLink>
-          <button @click="handleLogout" style="background:none; color:#ef4444; border:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px;">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10.667 11.333L14 8l-3.333-3.333M14 8H6M6.667 14H2.667C2.3 14 2 13.7 2 13.333V2.667C2 2.3 2.3 2 2.667 2h4" stroke="#ef4444" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            로그아웃
-          </button>
-        </nav>
+        </div>
       </div>
 
       <!-- MAIN -->
       <div style="display:flex; flex-direction:column; gap:20px;">
 
-        <!-- 통계 카드 4개 -->
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
-          <div v-for="stat in stats" :key="stat.label" style="background:#fff; border-radius:16px; padding:20px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-            <div style="width:40px; height:40px; border-radius:12px; margin:0 auto 10px; display:flex; align-items:center; justify-content:center;" :style="{background: stat.bgColor}">
-              <span v-html="stat.icon"></span>
-            </div>
-            <div style="font-size:22px; font-weight:700; color:#111827; margin-bottom:4px;">{{ stat.value.value }}</div>
-            <div style="font-size:13px; color:#9ca3af;">{{ stat.label }}</div>
-          </div>
+        <!-- 탭 버튼 -->
+        <div style="display:flex; gap:8px; background:#fff; border-radius:16px; padding:8px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <button v-for="menu in menus" :key="menu.key"
+            @click="activeMenu = menu.key"
+            :style="activeMenu === menu.key
+              ? 'flex:1; padding:10px; border-radius:10px; font-size:14px; font-weight:700; border:none; background:#6366f1; color:#fff; cursor:pointer;'
+              : 'flex:1; padding:10px; border-radius:10px; font-size:14px; font-weight:500; border:none; background:none; color:#6b7280; cursor:pointer;'"
+          >{{ menu.label }}</button>
         </div>
 
         <!-- 내 프로젝트 -->
@@ -185,21 +189,6 @@
           </div>
         </div>
 
-        <!-- 최근 활동 -->
-        <div style="background:#fff; border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-          <h2 style="font-size:16px; font-weight:700; color:#111827; margin:0 0 16px;">📈 최근 활동</h2>
-          <div style="display:flex; flex-direction:column; gap:0;">
-            <div v-for="(act, i) in recentActivities" :key="i" style="display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid #f9fafb;">
-              <div style="width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;" :style="{background: act.bgColor}">
-                <span v-html="act.icon"></span>
-              </div>
-              <div style="flex:1;">
-                <div style="font-size:14px; color:#374151;">{{ act.text }}</div>
-                <div style="font-size:12px; color:#9ca3af; margin-top:2px;">{{ act.time }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
 
       </div>
     </div>
@@ -207,51 +196,49 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getProjects, getMyBookmarks, getMyLikes, getMyApplications, cancelApplication, deleteProject } from '../api/project.js'
-import { userId, clearAuth } from '../store/auth.js'
-import { useRouter } from 'vue-router'
+import { getPortfolio } from '../api/user.js'
+import { userId } from '../store/auth.js'
+import { useRouter, useRoute } from 'vue-router'
 import NavBar from '../components/NavBar.vue'
 
 const router = useRouter()
-const activeMenu = ref('projects')
+const route = useRoute()
+const validTabs = ['projects', 'applied', 'bookmarks', 'likes']
+const activeMenu = ref(validTabs.includes(route.query.tab) ? route.query.tab : 'projects')
 
-const user = {
+const user = ref({
   name: localStorage.getItem('userName') ?? '사용자',
   university: localStorage.getItem('userSchool') ?? '',
   department: localStorage.getItem('userDepartment') ?? '',
   techStack: [],
-}
+})
 
 const menus = [
-  { key: 'projects', label: '내 프로젝트', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.33"/></svg>' },
-  { key: 'applied', label: '지원한 프로젝트', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.333 14v-1.333A2.667 2.667 0 0 0 10.667 10H5.333A2.667 2.667 0 0 0 2.667 12.667V14M8 7.333A2.667 2.667 0 1 0 8 2a2.667 2.667 0 0 0 0 5.333z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-  { key: 'bookmarks', label: '북마크', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.333 1.333H4.667C4.3 1.333 4 1.633 4 2v12l4-2.667L12 14V2c0-.367-.3-.667-.667-.667z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-  { key: 'likes', label: '좋아요', icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.893 3.107a3.667 3.667 0 0 0-5.18 0L8 3.813l-.713-.706a3.667 3.667 0 0 0-5.18 5.18L8 14.187l5.893-5.9a3.667 3.667 0 0 0 0-5.18z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-]
-
-const stats = [
-  { label: '작성 프로젝트', value: ref(0), bgColor: '#ede9fe', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5" stroke="#6366f1" stroke-width="1.5"/></svg>' },
-  { label: '받은 좋아요', value: ref(0), bgColor: '#fce7f3', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.367 3.883a4.583 4.583 0 0 0-6.475 0L10 4.767l-.892-.884a4.583 4.583 0 0 0-6.475 6.475L10 17.733l7.367-7.375a4.583 4.583 0 0 0 0-6.475z" stroke="#ec4899" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-  { label: '코드 리뷰', value: ref(0), bgColor: '#dbeafe', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.5 13.333c0 .442-.176.866-.488 1.179-.313.312-.737.488-1.179.488H5.833L2.5 17.5V4.167c0-.442.176-.866.488-1.179C3.3 2.676 3.724 2.5 4.167 2.5h11.666c.442 0 .866.176 1.179.488.312.313.488.737.488 1.179v9.166z" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-  { label: '팀 참여', value: ref(0), bgColor: '#d1fae5', icon: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14.167 17.5v-1.667A3.333 3.333 0 0 0 10.833 12.5H4.167a3.333 3.333 0 0 0-3.334 3.333V17.5M19.167 17.5v-1.667a3.333 3.333 0 0 0-2.5-3.225M13.333 2.608a3.333 3.333 0 0 1 0 6.459M7.5 9.167a3.333 3.333 0 1 0 0-6.667 3.333 3.333 0 0 0 0 6.667z" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { key: 'projects', label: '내 프로젝트' },
+  { key: 'applied', label: '지원한 프로젝트' },
+  { key: 'bookmarks', label: '북마크' },
+  { key: 'likes', label: '좋아요' },
 ]
 
 const myProjects = ref([])
 const appliedProjects = ref([])
 const bookmarkedProjects = ref([])
 const likedProjects = ref([])
-const recentActivities = ref([])
 
 onMounted(async () => {
+  try {
+    const portfolio = await getPortfolio(userId.value)
+    user.value.techStack = portfolio.techStacks ?? []
+  } catch {}
+
   try {
     const all = await getProjects()
     const uid = String(userId.value)
     myProjects.value = (Array.isArray(all) ? all : []).filter(p =>
       String(p.userId) === uid || String(p.authorId) === uid
     )
-    stats[0].value.value = myProjects.value.length
-    stats[1].value.value = myProjects.value.reduce((s, p) => s + (p.likeCount ?? 0), 0)
   } catch {}
 
   try {
@@ -266,11 +253,9 @@ onMounted(async () => {
 
   try {
     const data = await getMyApplications()
-    console.log('[내 신청 목록]', data)
     appliedProjects.value = Array.isArray(data) ? data : []
   } catch (e) {
     console.error('[내 신청 목록 실패]', e?.response?.status, e?.response?.data)
-    // 401: 인증 실패 (백엔드 수정 대기 중)
   }
 })
 
@@ -287,10 +272,5 @@ async function handleCancelApplication(projectId, applicationId) {
     await cancelApplication(projectId, applicationId)
     appliedProjects.value = appliedProjects.value.filter(a => a.id !== applicationId)
   } catch {}
-}
-
-function handleLogout() {
-  clearAuth()
-  router.push('/login')
 }
 </script>

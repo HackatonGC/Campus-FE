@@ -209,8 +209,8 @@ onMounted(async () => {
   } catch {}
 
   try {
-    const data = await getProjects()
-    projects.value = Array.isArray(data) ? data.filter(p => String(p.authorId) === String(id)) : []
+    const data = await getProjects({ authorId: id })
+    projects.value = Array.isArray(data) ? data : []
   } catch {
     projects.value = []
   }

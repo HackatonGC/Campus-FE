@@ -40,7 +40,7 @@
 
           <!-- RECRUITING: 작성자 + 액션 (메인에 표시) -->
           <div v-if="project.status === 'RECRUITING'" style="background:#fff; border-radius:16px; padding:20px 24px; box-shadow:0 1px 4px rgba(0,0,0,0.06); margin-bottom:20px; display:flex; align-items:center; justify-content:space-between;">
-            <div style="display:flex; align-items:center; gap:12px;">
+            <RouterLink :to="`/user/${project.authorId}`" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
               <div style="width:44px; height:44px; border-radius:50%; background:#ede9fe; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; color:#6366f1;">
                 {{ (project.authorName ?? '?').charAt(0) }}
               </div>
@@ -48,7 +48,7 @@
                 <div style="font-size:15px; font-weight:700; color:#111827;">{{ project.authorName }}</div>
                 <div v-if="project.authorSchool" style="font-size:12px; color:#9ca3af;">{{ project.authorSchool }}</div>
               </div>
-            </div>
+            </RouterLink>
             <div style="display:flex; align-items:center; gap:8px;">
               <button @click="toggleLike" :style="`display:flex; align-items:center; gap:5px; font-size:13px; padding:8px 16px; border-radius:10px; cursor:pointer; border:1.5px solid ${liked ? '#ef4444' : '#e5e7eb'}; background:${liked ? '#fff5f5' : '#fff'}; color:${liked ? '#ef4444' : '#6b7280'}; font-weight:500;`">
                 <svg width="15" height="15" viewBox="0 0 24 24" :fill="liked ? '#ef4444' : 'none'" :stroke="liked ? '#ef4444' : '#6b7280'" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -251,7 +251,7 @@
 
           <!-- 완료 전용: 작성자 + 액션 -->
           <div v-if="project.status === 'COMPLETED'" style="background:#fff; border-radius:16px; padding:20px 24px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f3f4f6;">
+            <RouterLink :to="`/user/${project.authorId}`" style="display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f3f4f6; text-decoration:none;">
               <div style="width:40px; height:40px; border-radius:50%; background:#d1fae5; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:#059669;">
                 {{ (project.authorName ?? '?').charAt(0) }}
               </div>
@@ -259,7 +259,7 @@
                 <div style="font-size:14px; font-weight:700; color:#111827;">{{ project.authorName }}</div>
                 <div v-if="project.authorSchool" style="font-size:12px; color:#9ca3af;">{{ project.authorSchool }}</div>
               </div>
-            </div>
+            </RouterLink>
             <div style="display:flex; gap:8px;">
               <button @click="toggleLike" :style="`flex:1; display:flex; align-items:center; justify-content:center; gap:5px; font-size:13px; padding:9px; border-radius:10px; cursor:pointer; border:1.5px solid ${liked ? '#ef4444' : '#e5e7eb'}; background:${liked ? '#fff5f5' : '#fff'}; color:${liked ? '#ef4444' : '#6b7280'}; font-weight:500;`">
                 <svg width="14" height="14" viewBox="0 0 24 24" :fill="liked ? '#ef4444' : 'none'" :stroke="liked ? '#ef4444' : '#6b7280'" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>

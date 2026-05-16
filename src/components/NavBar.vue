@@ -45,9 +45,8 @@
             <div style="font-size:15px; font-weight:700; color:#111827;">{{ userName }}</div>
             <div v-if="userSchool" style="font-size:12px; color:#6b7280; margin-top:2px;">{{ userSchool }}</div>
           </div>
-          <RouterLink to="/mypage" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">내 프로젝트</RouterLink>
-          <RouterLink to="/mypage" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">북마크</RouterLink>
-          <RouterLink to="/settings" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">설정</RouterLink>
+          <RouterLink to="/mypage" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">마이페이지</RouterLink>
+          <RouterLink to="/settings?tab=security" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">설정</RouterLink>
           <div style="border-top:1px solid #f3f4f6; margin:4px 0;"></div>
           <button @click="handleLogout" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#ef4444; background:none; border:none; cursor:pointer; border-radius:10px; text-align:left;" onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='none'">로그아웃</button>
         </div>
