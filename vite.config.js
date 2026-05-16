@@ -12,6 +12,13 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: env.VITE_BE_URL || 'http://172.25.86.226:8080',
           changeOrigin: true,
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq, req) => {
+              if (req.headers['authorization']) {
+                proxyReq.setHeader('Authorization', req.headers['authorization'])
+              }
+            })
+          },
         },
       },
     },

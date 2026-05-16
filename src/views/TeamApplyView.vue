@@ -4,7 +4,7 @@
       <div style="max-width:1280px; margin:0 auto; padding:0 40px; height:68px; display:flex; align-items:center; justify-content:space-between;">
         <RouterLink to="/" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
           <div style="width:44px; height:44px; background:#6366f1; border-radius:12px; display:flex; align-items:center; justify-content:center;">
-            <svg width="28" height="28" viewBox="0 0 48 48" fill="none"><path d="M25.66 4.36C25.14 4.12 24.57 4 24 4C23.43 4 22.86 4.12 22.34 4.36L5.2 12.16C4.85 12.32 4.54 12.57 4.33 12.9C4.12 13.22 4.01 13.6 4.01 13.99C4.01 14.38 4.12 14.76 4.33 15.08C4.54 15.41 4.85 15.66 5.2 15.82L22.36 23.64C22.88 23.88 23.45 24 24.02 24C24.59 24 25.16 23.88 25.68 23.64L42.84 15.84C43.2 15.68 43.5 15.43 43.71 15.1C43.92 14.78 44.03 14.4 44.03 14.01C44.03 13.62 43.92 13.24 43.71 12.92C43.5 12.59 43.2 12.34 42.84 12.18L25.66 4.36Z" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 24C4 24.38 4.11 24.76 4.31 25.08C4.52 25.4 4.81 25.66 5.16 25.82L22.36 33.64C22.88 33.87 23.44 33.99 24.01 33.99C24.58 33.99 25.14 33.87 25.66 33.64L42.82 25.84C43.17 25.68 43.47 25.42 43.68 25.1C43.89 24.77 44 24.39 44 24" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 34C4 34.38 4.11 34.76 4.31 35.08C4.52 35.4 4.81 35.66 5.16 35.82L22.36 43.64C22.88 43.87 23.44 43.99 24.01 43.99C24.58 43.99 25.14 43.87 25.66 43.64L42.82 35.84C43.17 35.68 43.47 35.42 43.68 35.1C43.89 34.77 44 34.39 44 34" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <img :src="iconLogo" style="width:28px; height:28px;" alt="StackMate" />
           </div>
           <div>
             <div style="font-weight:700; font-size:16px; background:linear-gradient(to right,#6366f1,rgba(99,102,241,0.7)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">StackMate</div>
@@ -15,40 +15,95 @@
     </nav>
 
     <div style="max-width:640px; margin:0 auto; padding:48px 40px;">
-      <RouterLink :to="`/project/${route.params.id}`" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6b7280; text-decoration:none; margin-bottom:24px;">
+      <RouterLink :to="`/project/${route.params.id}`" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6b7280; text-decoration:none; margin-bottom:28px;">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         프로젝트로 돌아가기
       </RouterLink>
 
-      <div style="background:#fff; border-radius:20px; padding:36px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-        <div style="margin-bottom:28px;">
-          <h1 style="font-size:22px; font-weight:800; color:#111827; margin:0 0 6px;">팀원 신청</h1>
-          <p style="font-size:14px; color:#9ca3af; margin:0;">팀에 합류하고 싶은 이유를 자유롭게 작성해주세요</p>
+      <div v-if="loading" style="text-align:center; padding:80px 0; color:#9ca3af; font-size:14px;">불러오는 중...</div>
+
+      <div v-else style="display:flex; flex-direction:column; gap:16px;">
+
+        <!-- 프로젝트 요약 -->
+        <div style="background:#fff; border-radius:16px; padding:18px 22px; box-shadow:0 1px 4px rgba(0,0,0,0.06); display:flex; align-items:center; gap:14px;">
+          <div style="width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,#6366f1,#818cf8); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#fff; flex-shrink:0;">
+            {{ (project?.title ?? '?').charAt(0) }}
+          </div>
+          <div>
+            <div style="font-size:15px; font-weight:700; color:#111827;">{{ project?.title }}</div>
+            <div style="font-size:12px; color:#9ca3af; margin-top:2px;">{{ project?.authorName }}<span v-if="project?.authorSchool"> · {{ project?.authorSchool }}</span></div>
+          </div>
         </div>
 
-        <div style="margin-bottom:24px;">
-          <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">신청 메시지 <span style="color:#ef4444;">*</span></label>
-          <textarea
-            v-model="message"
-            placeholder="참여 동기, 기여할 수 있는 부분, 관심 기술 등을 자유롭게 작성해주세요"
-            maxlength="500"
-            rows="6"
-            style="width:100%; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:14px; color:#111827; resize:none; outline:none; box-sizing:border-box; line-height:1.7; background:#f9fafb;"
-          ></textarea>
-          <div style="text-align:right; font-size:12px; color:#9ca3af; margin-top:4px;">{{ message.length }}/500</div>
-        </div>
+        <!-- 폼 카드 -->
+        <div style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <h1 style="font-size:20px; font-weight:800; color:#111827; margin:0 0 4px;">팀원 지원하기</h1>
+          <p style="font-size:14px; color:#9ca3af; margin:0 0 28px;">지원할 역할을 선택하고 소개를 작성해주세요</p>
 
-        <p v-if="errorMsg" style="font-size:13px; color:#ef4444; margin:0 0 16px;">{{ errorMsg }}</p>
+          <!-- 역할 선택 -->
+          <div style="margin-bottom:24px;">
+            <label style="display:block; font-size:14px; font-weight:700; color:#374151; margin-bottom:10px;">
+              지원 역할 <span style="color:#ef4444;">*</span>
+            </label>
 
-        <div style="display:flex; gap:12px; justify-content:flex-end;">
-          <RouterLink :to="`/project/${route.params.id}`"
-            style="padding:11px 24px; border-radius:10px; border:1.5px solid #e5e7eb; background:#fff; color:#374151; font-size:14px; font-weight:600; text-decoration:none; display:flex; align-items:center;">
-            취소
-          </RouterLink>
-          <button @click="handleApply" :disabled="!message.trim() || submitting"
-            :style="`padding:11px 28px; border-radius:10px; border:none; background:${message.trim() && !submitting ? '#6366f1' : '#c7d2fe'}; color:#fff; font-size:14px; font-weight:600; cursor:${message.trim() && !submitting ? 'pointer' : 'not-allowed'};`">
-            {{ submitting ? '신청 중...' : '신청하기' }}
-          </button>
+            <div v-if="(project?.recruitments ?? []).length" style="display:flex; flex-direction:column; gap:8px;">
+              <div v-for="r in project.recruitments" :key="r.role"
+                @click="!isFull(r) && (selectedRole = r.role)"
+                :style="`border-radius:12px; padding:14px 16px; border:2px solid ${selectedRole === r.role ? '#6366f1' : '#e5e7eb'}; background:${isFull(r) ? '#f9fafb' : selectedRole === r.role ? '#fafbff' : '#fff'}; cursor:${isFull(r) ? 'not-allowed' : 'pointer'}; opacity:${isFull(r) ? '0.6' : '1'}; transition:border-color 0.15s, background 0.15s;`">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                  <div style="display:flex; align-items:center; gap:9px;">
+                    <div :style="`width:16px; height:16px; border-radius:50%; border:2px solid ${selectedRole === r.role ? '#6366f1' : '#d1d5db'}; background:${selectedRole === r.role ? '#6366f1' : '#fff'}; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s;`">
+                      <div v-if="selectedRole === r.role" style="width:5px; height:5px; border-radius:50%; background:#fff;"></div>
+                    </div>
+                    <span style="font-size:14px; font-weight:700; color:#111827;">{{ r.role }}</span>
+                  </div>
+                  <span v-if="isFull(r)" style="font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px; background:#fce7f3; color:#be185d;">
+                    마감
+                  </span>
+                  <span v-else :style="`font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px; ${selectedRole === r.role ? 'background:#ede9fe; color:#6366f1;' : 'background:#f3f4f6; color:#9ca3af;'}`">
+                    {{ r.count - (r.acceptedCount ?? 0) }}명 남음
+                  </span>
+                </div>
+                <div v-if="r.skills || r.description" style="margin-left:25px; margin-top:4px; display:flex; flex-direction:column; gap:2px;">
+                  <span v-if="r.skills" style="font-size:12px; color:#6b7280;">🛠 {{ r.skills }}</span>
+                  <span v-if="r.description" style="font-size:12px; color:#9ca3af;">{{ r.description }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-else style="padding:20px; background:#f9fafb; border-radius:12px; border:1.5px dashed #e5e7eb; text-align:center; font-size:13px; color:#9ca3af;">
+              모집 중인 역할 정보가 없어요
+            </div>
+          </div>
+
+          <!-- 지원 메시지 -->
+          <div style="margin-bottom:24px;">
+            <label style="display:block; font-size:14px; font-weight:700; color:#374151; margin-bottom:8px;">
+              지원 메시지 <span style="color:#ef4444;">*</span>
+            </label>
+            <textarea
+              v-model="message"
+              placeholder="참여 동기, 기여할 수 있는 부분, 관련 경험 등을 자유롭게 작성해주세요"
+              maxlength="500"
+              rows="6"
+              style="width:100%; padding:14px 16px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:14px; color:#111827; resize:none; outline:none; box-sizing:border-box; line-height:1.7; background:#f9fafb;"
+              @focus="e=>e.target.style.borderColor='#6366f1'" @blur="e=>e.target.style.borderColor='#e5e7eb'"
+            ></textarea>
+            <div style="text-align:right; font-size:12px; color:#9ca3af; margin-top:4px;">{{ message.length }}/500</div>
+          </div>
+
+          <p v-if="errorMsg" style="font-size:13px; color:#ef4444; margin:0 0 16px;">{{ errorMsg }}</p>
+
+          <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <RouterLink :to="`/project/${route.params.id}`"
+              style="padding:11px 24px; border-radius:10px; border:1.5px solid #e5e7eb; background:#fff; color:#374151; font-size:14px; font-weight:600; text-decoration:none; display:flex; align-items:center;">
+              취소
+            </RouterLink>
+            <button @click="handleApply" :disabled="!canSubmit || submitting"
+              :style="`padding:11px 28px; border-radius:10px; border:none; background:${canSubmit && !submitting ? '#6366f1' : '#c7d2fe'}; color:#fff; font-size:14px; font-weight:700; cursor:${canSubmit && !submitting ? 'pointer' : 'not-allowed'};`">
+              {{ submitting ? '신청 중...' : '지원하기 →' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -56,26 +111,52 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { applyToProject } from '../api/project.js'
+import { applyToProject, getProject } from '../api/project.js'
+import iconLogo from '../assets/Icon.svg'
 
 const route = useRoute()
 const router = useRouter()
 
+const project = ref(null)
+const loading = ref(true)
+const selectedRole = ref('')
 const message = ref('')
 const submitting = ref(false)
 const errorMsg = ref('')
 
+const isFull = (r) => (r.acceptedCount ?? 0) >= r.count
+
+const canSubmit = computed(() => selectedRole.value && message.value.trim().length > 0)
+
+onMounted(async () => {
+  try {
+    project.value = await getProject(route.params.id)
+    if (project.value?.recruitments?.length === 1) {
+      selectedRole.value = project.value.recruitments[0].role
+    }
+  } catch {
+    project.value = null
+  } finally {
+    loading.value = false
+  }
+})
+
 async function handleApply() {
-  if (!message.value.trim()) return
+  if (!canSubmit.value) return
   submitting.value = true
   errorMsg.value = ''
   try {
-    await applyToProject(route.params.id, { message: message.value.trim() })
+    await applyToProject(route.params.id, { role: selectedRole.value, message: message.value.trim() })
     router.push(`/project/${route.params.id}`)
   } catch (e) {
-    errorMsg.value = e?.response?.status === 409 ? '이미 신청한 프로젝트예요.' : '신청에 실패했습니다. 다시 시도해주세요.'
+    const status = e?.response?.status
+    errorMsg.value =
+      status === 409 ? '이미 신청한 프로젝트예요.' :
+      status === 403 ? '본인이 등록한 프로젝트에는 지원할 수 없어요.' :
+      status === 400 ? '모집이 마감되었거나 존재하지 않는 역할이에요.' :
+      '신청에 실패했어요. 다시 시도해주세요.'
   } finally {
     submitting.value = false
   }
