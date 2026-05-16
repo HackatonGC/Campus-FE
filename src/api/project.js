@@ -6,6 +6,9 @@ export const getProjects = (params = {}) =>
 export const getProject = (id) =>
   api.get(`/api/v1/projects/${id}`)
 
+export const getPopularTags = (limit = 5) =>
+  api.get('/api/v1/projects/popular-tags', { params: { limit } })
+
 export const createProject = (form) =>
   api.post('/api/v1/projects', form)
 
