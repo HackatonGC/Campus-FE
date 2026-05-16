@@ -2,7 +2,7 @@
   <div class="min-h-screen flex flex-col items-center justify-center" style="background: #eeeeff">
 
     <!-- Logo (카드 밖) -->
-    <div class="flex items-center justify-center gap-3">
+    <RouterLink to="/" class="flex items-center justify-center gap-3">
       <div
         class="w-12 h-12 rounded-xl flex items-center justify-center"
         style="background: #6366f1"
@@ -14,7 +14,7 @@
         </svg>
       </div>
       <span class="text-2xl font-bold" style="color: #6366f1">StackMate</span>
-    </div>
+    </RouterLink>
 
     <!-- 공백 -->
     <div class="h-[20px]"></div>
@@ -172,8 +172,9 @@
             />
             <button
               type="button"
-              class="rounded-xl text-sm font-medium transition hover:opacity-90"
+              :class="['rounded-xl text-sm font-medium transition-all hover:opacity-90', verifyClicked ? 'verify-pop' : '']"
               style="height: 44px; padding-left: 21px; padding-right: 21px; border: 1.5px solid #e5e7eb; color: #374151; white-space: nowrap"
+              @click="handleVerify"
             >인증</button>
           </div>
 
@@ -246,6 +247,12 @@ const signupSchool = ref('')
 const signupDept = ref('')
 const signupEmail = ref('')
 const signupPassword = ref('')
+const verifyClicked = ref(false)
+
+function handleVerify() {
+  verifyClicked.value = true
+  setTimeout(() => { verifyClicked.value = false }, 2000)
+}
 const techOptions = [
   'React', 'Next.js', 'Vue', 'Angular',
   'Spring', 'Spring Boot', 'Node.js', 'Express', 'Django', 'FastAPI',
@@ -272,4 +279,19 @@ function handleSignup() {
   console.log('signup', signupName.value, signupEmail.value, selectedTech.value)
 }
 </script>
+
+<style scoped>
+@keyframes pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.92); }
+  70%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.verify-pop {
+  animation: pop 0.3s ease;
+  background: #ede9fe;
+  color: #6366f1;
+  border-color: #6366f1;
+}
+</style>
 
