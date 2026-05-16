@@ -98,9 +98,12 @@
             모집 중인 프로젝트만
           </button>
         </div>
-        <button style="width:100%; padding:14px; border-radius:12px; font-size:14px; font-weight:600; background:#6366f1; color:#fff; border:none; cursor:pointer;">
+        <RouterLink
+          to="/project/new"
+          style="display:block; width:100%; padding:14px; border-radius:12px; font-size:14px; font-weight:600; background:#6366f1; color:#fff; text-align:center; text-decoration:none; box-sizing:border-box;"
+        >
           + 프로젝트 등록
-        </button>
+        </RouterLink>
       </aside>
 
       <!-- 메인 -->
@@ -184,11 +187,24 @@
       </main>
     </div>
 
+  <!-- 토스트 -->
+  <transition name="home-toast">
+    <div
+      v-if="toast.show"
+      style="position:fixed; top:84px; left:50%; transform:translateX(-50%); background:#10b981; color:#fff; font-size:14px; font-weight:600; padding:14px 28px; border-radius:12px; z-index:100; white-space:nowrap; display:flex; align-items:center; gap:8px; box-shadow:0 4px 20px rgba(16,185,129,0.35);"
+    >
+      <svg style="width:18px; height:18px; flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+      </svg>
+      {{ toast.message }}
+    </div>
+  </transition>
+
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { projects, techOptions } from '../data/dummy.js'
 
 import iconLogo    from '../assets/Icon.svg'
@@ -202,6 +218,15 @@ import iconFilter  from '../assets/Icon (6).svg'
 const searchQuery = ref('')
 const selectedTags = ref([])
 const onlyRecruiting = ref(false)
+const toast = ref({ show: false, message: '' })
+
+onMounted(() => {
+  if (history.state?.registered) {
+    toast.value = { show: true, message: '프로젝트가 등록되었습니다! 🎉' }
+    setTimeout(() => { toast.value.show = false }, 3000)
+    history.replaceState({}, '')
+  }
+})
 
 const popularTags = ['React', 'Spring', 'AI/ML', 'Android', 'Unity']
 
@@ -230,3 +255,8 @@ const filteredProjects = computed(() => {
   })
 })
 </script>
+
+<style scoped>
+.home-toast-enter-active, .home-toast-leave-active { transition: opacity 0.25s, transform 0.25s; }
+.home-toast-enter-from, .home-toast-leave-to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+</style>
