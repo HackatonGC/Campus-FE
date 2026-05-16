@@ -5,9 +5,11 @@ import ReviewRequestView from '../views/ReviewRequestView.vue'
 import TeamApplyView from '../views/TeamApplyView.vue'
 import ProjectRegisterView from '../views/ProjectRegisterView.vue'
 import ProjectPreviewView from '../views/ProjectPreviewView.vue'
+import LoginView from '../views/LoginView.vue'
 
 const routes = [
   { path: '/', component: HomeView },
+  { path: '/login', component: LoginView },
   { path: '/project/new', component: ProjectRegisterView },
   { path: '/project/preview', component: ProjectPreviewView },
   { path: '/project/:id', component: DetailView },
