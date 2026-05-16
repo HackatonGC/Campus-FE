@@ -3,45 +3,21 @@
 
     <NavBar />
 
-    <!-- BODY -->
-    <div style="max-width:1280px; margin:0 auto; padding:32px 40px;">
+    <div style="max-width:800px; margin:0 auto; padding:32px 40px;">
 
       <!-- 헤더 -->
       <div style="margin-bottom:28px;">
-        <h1 style="font-size:24px; font-weight:700; color:#111827; margin:0 0 6px;">설정</h1>
-        <p style="font-size:14px; color:#9ca3af; margin:0;">계정 및 서비스 설정을 관리하세요</p>
+        <h1 style="font-size:24px; font-weight:700; color:#111827; margin:0 0 6px;">{{ mode === 'security' ? '계정 설정' : '프로필 수정' }}</h1>
+        <p style="font-size:14px; color:#9ca3af; margin:0;">{{ mode === 'security' ? '보안 및 계정 설정을 관리하세요' : '개인정보와 포트폴리오를 관리하세요' }}</p>
       </div>
 
-      <!-- 2컬럼 레이아웃 -->
-      <div style="display:grid; grid-template-columns:240px 1fr; gap:24px; align-items:start;">
+      <div style="display:flex; flex-direction:column; gap:20px;">
 
-        <!-- SIDEBAR -->
-        <div style="background:#fff; border-radius:16px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-          <nav style="display:flex; flex-direction:column; gap:2px;">
-            <button
-              v-for="menu in menus"
-              :key="menu.key"
-              @click="activeMenu = menu.key"
-              :style="activeMenu === menu.key
-                ? (menu.key === 'delete'
-                    ? 'background:#fef2f2; color:#ef4444; border:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px;'
-                    : 'background:#6366f1; color:#fff; border:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px;')
-                : (menu.key === 'delete'
-                    ? 'background:none; color:#ef4444; border:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px;'
-                    : 'background:none; color:#374151; border:none; cursor:pointer; width:100%; text-align:left; padding:10px 14px; border-radius:10px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px;')"
-            >
-              <span v-html="activeMenu === menu.key && menu.key !== 'delete' ? menu.iconActive : menu.icon"></span>
-              {{ menu.label }}
-            </button>
-          </nav>
-        </div>
-
-        <!-- CONTENT -->
-        <div>
+        <!-- ====== 프로필 수정 모드 ====== -->
+        <template v-if="mode === 'profile'">
 
           <!-- 개인정보 -->
-          <div v-if="activeMenu === 'profile'" style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-            <!-- 헤더 -->
+          <div style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
               <div>
                 <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">개인정보</h2>
@@ -106,7 +82,7 @@
               <div style="height:44px; padding:0 14px; background:#f9fafb; border-radius:10px; display:flex; align-items:center; font-size:14px; color:#111827;">{{ formatDate(user.createdAt) }}</div>
             </div>
 
-            <!-- 저장/취소 버튼 (편집 중일 때) -->
+            <!-- 저장/취소 버튼 -->
             <div v-if="profileEditing" style="display:flex; align-items:center; gap:12px; justify-content:flex-end;">
               <span v-if="profileEditMsg" :style="`font-size:13px; color:${profileEditMsg.includes('실패') ? '#ef4444' : '#10b981'};`">{{ profileEditMsg }}</span>
               <button @click="profileEditing = false" style="padding:10px 24px; border-radius:10px; border:1.5px solid #e5e7eb; background:#fff; color:#374151; font-size:14px; font-weight:600; cursor:pointer;">취소</button>
@@ -115,7 +91,7 @@
           </div>
 
           <!-- 포트폴리오 -->
-          <div v-else-if="activeMenu === 'edit'" style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
             <div style="margin-bottom:28px;">
               <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">포트폴리오</h2>
               <p style="font-size:13px; color:#9ca3af; margin:0;">자기소개와 포트폴리오 정보를 관리하세요</p>
@@ -124,13 +100,8 @@
             <!-- 자기소개 -->
             <div style="margin-bottom:22px;">
               <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">자기소개</label>
-              <textarea
-                v-model="editBio"
-                placeholder="간단한 자기소개를 작성해보세요 (최대 200자)"
-                maxlength="200"
-                rows="4"
-                style="width:100%; padding:12px 14px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:14px; color:#111827; background:#f9fafb; resize:none; outline:none; box-sizing:border-box; line-height:1.6;"
-              ></textarea>
+              <textarea v-model="editBio" placeholder="간단한 자기소개를 작성해보세요 (최대 200자)" maxlength="200" rows="4"
+                style="width:100%; padding:12px 14px; border:1.5px solid #e5e7eb; border-radius:12px; font-size:14px; color:#111827; background:#f9fafb; resize:none; outline:none; box-sizing:border-box; line-height:1.6;"></textarea>
               <div style="text-align:right; font-size:12px; color:#9ca3af; margin-top:4px;">{{ editBio.length }}/200</div>
             </div>
 
@@ -138,11 +109,7 @@
             <div style="margin-bottom:22px;">
               <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">관심 기술 스택 <span style="color:#9ca3af; font-weight:400;">(최대 5개)</span></label>
               <div style="display:flex; flex-wrap:wrap; gap:8px; padding:12px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb;">
-                <button
-                  v-for="tag in techOptions"
-                  :key="tag"
-                  type="button"
-                  @click="toggleEditTech(tag)"
+                <button v-for="tag in techOptions" :key="tag" type="button" @click="toggleEditTech(tag)"
                   :style="editSelectedTech.includes(tag)
                     ? 'padding:4px 12px; border-radius:999px; font-size:13px; border:1.5px solid #6366f1; background:#ede9fe; color:#6366f1; cursor:pointer;'
                     : 'padding:4px 12px; border-radius:999px; font-size:13px; border:1.5px solid #e5e7eb; background:#fff; color:#6b7280; cursor:pointer;'"
@@ -166,101 +133,98 @@
                 style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
             </div>
 
-            <!-- 포트폴리오 -->
+            <!-- 포트폴리오 URL -->
             <div style="margin-bottom:32px;">
               <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">포트폴리오</label>
               <input v-model="editPortfolio" type="url" placeholder="https://portfolio.example.com"
                 style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
             </div>
 
-            <!-- 버튼 -->
+            <!-- 저장 버튼 -->
             <div style="display:flex; align-items:center; gap:12px; justify-content:flex-end;">
               <span v-if="editMsg" :style="`font-size:13px; color:${editMsg.includes('실패') ? '#ef4444' : '#10b981'};`">{{ editMsg }}</span>
-              <button @click="activeMenu = 'profile'" style="padding:10px 24px; border-radius:10px; border:1.5px solid #e5e7eb; background:#fff; color:#374151; font-size:14px; font-weight:600; cursor:pointer;">취소</button>
               <button @click="saveProfile" style="padding:10px 24px; border-radius:10px; border:none; background:#6366f1; color:#fff; font-size:14px; font-weight:600; cursor:pointer;">저장</button>
             </div>
           </div>
 
-          <!-- 계정 보안 -->
-          <div v-else-if="activeMenu === 'security'" style="display:flex; flex-direction:column; gap:20px;">
+        </template>
 
-            <!-- 비밀번호 변경 -->
-            <div style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-              <div style="margin-bottom:24px;">
-                <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">비밀번호 변경</h2>
-                <p style="font-size:13px; color:#9ca3af; margin:0;">계정 보안을 위해 주기적으로 비밀번호를 변경해주세요</p>
+        <!-- ====== 계정 설정 모드 ====== -->
+        <template v-else>
+
+          <!-- 비밀번호 변경 -->
+          <div style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="margin-bottom:24px;">
+              <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">비밀번호 변경</h2>
+              <p style="font-size:13px; color:#9ca3af; margin:0;">계정 보안을 위해 주기적으로 비밀번호를 변경해주세요</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div>
+                <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">현재 비밀번호</label>
+                <input v-model="currentPw" type="password" placeholder="현재 비밀번호를 입력하세요"
+                  style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
               </div>
-
-              <div style="display:flex; flex-direction:column; gap:16px;">
-                <div>
-                  <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">현재 비밀번호</label>
-                  <input v-model="currentPw" type="password" placeholder="현재 비밀번호를 입력하세요"
-                    style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
-                </div>
-                <div>
-                  <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">새 비밀번호</label>
-                  <input v-model="newPw" type="password" placeholder="8자 이상 입력하세요"
-                    style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
-                </div>
-                <div>
-                  <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">새 비밀번호 확인</label>
-                  <input v-model="confirmPw" type="password" placeholder="새 비밀번호를 다시 입력하세요"
-                    style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
-                </div>
+              <div>
+                <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">새 비밀번호</label>
+                <input v-model="newPw" type="password" placeholder="8자 이상 입력하세요"
+                  style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
               </div>
-
-              <div style="margin-top:24px; display:flex; align-items:center; gap:12px; justify-content:flex-end;">
-                <span v-if="pwMsg" :style="`font-size:13px; color:${pwMsg.includes('변경되었') ? '#10b981' : '#ef4444'};`">{{ pwMsg }}</span>
-                <button @click="handleChangePassword" style="padding:10px 24px; border-radius:10px; border:none; background:#6366f1; color:#fff; font-size:14px; font-weight:600; cursor:pointer;">비밀번호 변경</button>
+              <div>
+                <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">새 비밀번호 확인</label>
+                <input v-model="confirmPw" type="password" placeholder="새 비밀번호를 다시 입력하세요"
+                  style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
               </div>
             </div>
+            <div style="margin-top:24px; display:flex; align-items:center; gap:12px; justify-content:flex-end;">
+              <span v-if="pwMsg" :style="`font-size:13px; color:${pwMsg.includes('변경되었') ? '#10b981' : '#ef4444'};`">{{ pwMsg }}</span>
+              <button @click="handleChangePassword" style="padding:10px 24px; border-radius:10px; border:none; background:#6366f1; color:#fff; font-size:14px; font-weight:600; cursor:pointer;">비밀번호 변경</button>
+            </div>
+          </div>
 
-            <!-- 이메일 인증 -->
-            <div style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-              <div style="margin-bottom:20px;">
-                <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">이메일 인증</h2>
-                <p style="font-size:13px; color:#9ca3af; margin:0;">이메일 인증 상태를 확인하세요</p>
-              </div>
-              <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:#f9fafb; border-radius:12px; border:1.5px solid #f3f4f6;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                  <div style="width:40px; height:40px; border-radius:10px; background:#d1fae5; display:flex; align-items:center; justify-content:center;">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.5 13.333c0 .442-.176.866-.488 1.179-.313.312-.737.488-1.179.488H4.167l-2.5 2.5V5.833c0-.441.176-.865.488-1.178.313-.313.737-.489 1.179-.489h11.666c.442 0 .866.176 1.179.489.312.313.488.737.488 1.178v7.5z" stroke="#059669" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </div>
-                  <div>
-                    <div style="font-size:14px; font-weight:600; color:#111827;">{{ user.email }}</div>
-                    <div style="font-size:12px; color:#10b981; margin-top:2px;">인증된 이메일</div>
-                  </div>
+          <!-- 이메일 인증 -->
+          <div style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="margin-bottom:20px;">
+              <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">이메일 인증</h2>
+              <p style="font-size:13px; color:#9ca3af; margin:0;">이메일 인증 상태를 확인하세요</p>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:#f9fafb; border-radius:12px; border:1.5px solid #f3f4f6;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:#d1fae5; display:flex; align-items:center; justify-content:center;">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M17.5 13.333c0 .442-.176.866-.488 1.179-.313.312-.737.488-1.179.488H4.167l-2.5 2.5V5.833c0-.441.176-.865.488-1.178.313-.313.737-.489 1.179-.489h11.666c.442 0 .866.176 1.179.489.312.313.488.737.488 1.178v7.5z" stroke="#059669" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
-                <span style="font-size:12px; background:#d1fae5; color:#10b981; padding:4px 12px; border-radius:999px; font-weight:600;">인증됨</span>
+                <div>
+                  <div style="font-size:14px; font-weight:600; color:#111827;">{{ user.email }}</div>
+                  <div style="font-size:12px; color:#10b981; margin-top:2px;">인증된 이메일</div>
+                </div>
               </div>
+              <span style="font-size:12px; background:#d1fae5; color:#10b981; padding:4px 12px; border-radius:999px; font-weight:600;">인증됨</span>
             </div>
           </div>
 
           <!-- 공개 범위 -->
-          <div v-else-if="activeMenu === 'privacy'" style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
             <div style="margin-bottom:28px;">
               <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">공개 범위</h2>
               <p style="font-size:13px; color:#9ca3af; margin:0;">내 정보의 공개 여부를 설정하세요</p>
             </div>
-
             <div style="display:flex; flex-direction:column; gap:0;">
               <div v-for="(item, i) in privacyItems" :key="i"
-                :style="i < privacyItems.length - 1 ? 'display:flex; align-items:center; justify-content:space-between; padding:20px 0; border-bottom:1px solid #f3f4f6;' : 'display:flex; align-items:center; justify-content:space-between; padding:20px 0;'"
+                :style="i < privacyItems.length - 1
+                  ? 'display:flex; align-items:center; justify-content:space-between; padding:20px 0; border-bottom:1px solid #f3f4f6;'
+                  : 'display:flex; align-items:center; justify-content:space-between; padding:20px 0;'"
               >
                 <div>
                   <div style="font-size:15px; font-weight:600; color:#111827; margin-bottom:4px;">{{ item.title }}</div>
                   <div style="font-size:13px; color:#9ca3af;">{{ item.desc }}</div>
                 </div>
-                <!-- 토글 스위치 -->
-                <button
-                  @click="togglePrivacy(item)"
+                <button @click="togglePrivacy(item)"
                   :style="item.enabled
                     ? 'width:48px; height:28px; border-radius:999px; background:#6366f1; border:none; cursor:pointer; position:relative; transition:background 0.2s; flex-shrink:0;'
                     : 'width:48px; height:28px; border-radius:999px; background:#e5e7eb; border:none; cursor:pointer; position:relative; transition:background 0.2s; flex-shrink:0;'"
                 >
                   <span :style="item.enabled
-                    ? 'position:absolute; top:4px; right:4px; width:20px; height:20px; border-radius:50%; background:#fff; transition:right 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);'
-                    : 'position:absolute; top:4px; left:4px; width:20px; height:20px; border-radius:50%; background:#fff; transition:left 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);'"
+                    ? 'position:absolute; top:4px; right:4px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);'
+                    : 'position:absolute; top:4px; left:4px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.2);'"
                   ></span>
                 </button>
               </div>
@@ -268,50 +232,31 @@
           </div>
 
           <!-- 회원 탈퇴 -->
-          <div v-else-if="activeMenu === 'delete'" style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="background:#fff; border-radius:16px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
             <div style="margin-bottom:24px;">
               <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0 0 4px;">회원 탈퇴</h2>
               <p style="font-size:13px; color:#9ca3af; margin:0;">계정을 영구적으로 삭제합니다</p>
             </div>
-
-            <!-- 경고 박스 -->
             <div style="background:#fef2f2; border:1.5px solid #fecaca; border-radius:14px; padding:20px; margin-bottom:28px;">
               <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M8.575 3.258L1.517 15.25c-.18.31-.175.695.01 1 .187.307.52.495.88.5h14.12c.36-.005.695-.193.88-.5.184-.305.188-.69.007-1L10.358 3.258a1.038 1.038 0 0 0-1.783 0zM10 7.5v3.333M10 13.333h.008" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span style="font-size:14px; font-weight:700; color:#dc2626;">탈퇴 전 꼭 확인하세요</span>
               </div>
               <ul style="margin:0; padding:0 0 0 4px; list-style:none; display:flex; flex-direction:column; gap:8px;">
-                <li style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#dc2626;">
-                  <span style="margin-top:2px; flex-shrink:0;">•</span>모든 프로젝트와 데이터가 영구적으로 삭제됩니다
-                </li>
-                <li style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#dc2626;">
-                  <span style="margin-top:2px; flex-shrink:0;">•</span>작성한 댓글과 활동 기록이 삭제됩니다
-                </li>
-                <li style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#dc2626;">
-                  <span style="margin-top:2px; flex-shrink:0;">•</span>팀원 모집 정보가 사라집니다
-                </li>
-                <li style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#dc2626;">
-                  <span style="margin-top:2px; flex-shrink:0;">•</span>복구가 불가능합니다
-                </li>
+                <li style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#dc2626;"><span style="margin-top:2px; flex-shrink:0;">•</span>모든 프로젝트와 데이터가 영구적으로 삭제됩니다</li>
+                <li style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#dc2626;"><span style="margin-top:2px; flex-shrink:0;">•</span>작성한 댓글과 활동 기록이 삭제됩니다</li>
+                <li style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#dc2626;"><span style="margin-top:2px; flex-shrink:0;">•</span>팀원 모집 정보가 사라집니다</li>
+                <li style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#dc2626;"><span style="margin-top:2px; flex-shrink:0;">•</span>복구가 불가능합니다</li>
               </ul>
             </div>
-
-            <!-- 이름 확인 -->
             <div style="margin-bottom:28px;">
               <label style="display:block; font-size:14px; font-weight:600; color:#374151; margin-bottom:8px;">
                 확인을 위해 <span style="color:#6366f1;">"모든 내용을 확인하였습니다"</span> 를 입력하세요
               </label>
-              <input
-                v-model="deleteConfirm"
-                type="text"
-                placeholder="모든 내용을 확인하였습니다"
-                style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;"
-              />
+              <input v-model="deleteConfirm" type="text" placeholder="모든 내용을 확인하였습니다"
+                style="width:100%; height:44px; padding:0 14px; border:1.5px solid #e5e7eb; border-radius:12px; background:#f9fafb; font-size:14px; color:#111827; outline:none; box-sizing:border-box;" />
             </div>
-
-            <!-- 탈퇴 버튼 -->
-            <button
-              @click="handleDeleteAccount"
+            <button @click="handleDeleteAccount"
               :disabled="deleteConfirm !== '모든 내용을 확인하였습니다'"
               :style="deleteConfirm === '모든 내용을 확인하였습니다'
                 ? 'width:100%; padding:13px; border-radius:12px; border:none; background:#ef4444; color:#fff; font-size:15px; font-weight:700; cursor:pointer;'
@@ -319,36 +264,45 @@
             >계정 영구 삭제</button>
           </div>
 
-        </div>
+        </template>
+
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import NavBar from '../components/NavBar.vue'
 import { techOptions } from '../data/dummy.js'
 import { getUser, updateUser, getPortfolio, updatePortfolio, changePassword, updatePrivacy, deleteUser } from '../api/user.js'
 import { userId, clearAuth } from '../store/auth.js'
 
 const router = useRouter()
-const activeMenu = ref('profile')
+const route = useRoute()
+const mode = computed(() => route.query.tab === 'security' ? 'security' : 'profile')
 const user = ref({})
 
 onMounted(async () => {
   if (!userId.value) return
   try {
     user.value = await getUser(userId.value)
+    console.log('[getUser] techStacks:', user.value.techStacks)
     privacyItems[0].enabled = user.value.isProjectPublic ?? true
     privacyItems[1].enabled = user.value.isProfilePublic ?? true
     privacyItems[2].enabled = user.value.isActivityPublic ?? false
   } catch {}
   try {
     const portfolio = await getPortfolio(userId.value)
+    console.log('[getPortfolio] techStacks:', portfolio.techStacks)
     editBio.value = portfolio.bio ?? ''
-    editSelectedTech.value = [...(portfolio.techStacks ?? [])]
+    const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '')
+    const rawTechs = portfolio.techStacks?.length ? portfolio.techStacks : (user.value.techStacks ?? [])
+    editSelectedTech.value = rawTechs.map(
+      stored => techOptions.find(opt => normalize(opt) === normalize(stored)) ?? stored
+    )
+    console.log('[editSelectedTech]', editSelectedTech.value)
     editGithub.value = portfolio.githubUrl?.replace('https://github.com/', '') ?? ''
     editBlog.value = portfolio.blogUrl ?? ''
     editPortfolio.value = portfolio.portfolioUrl ?? ''
@@ -361,35 +315,6 @@ function formatDate(dateStr) {
   const d = new Date(dateStr)
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
 }
-
-const menus = [
-  {
-    key: 'profile', label: '개인정보',
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.333" r="2.667" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.667 14.667c0-2.946 2.388-5.334 5.333-5.334s5.333 2.388 5.333 5.334" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    iconActive: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.333" r="2.667" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.667 14.667c0-2.946 2.388-5.334 5.333-5.334s5.333 2.388 5.333 5.334" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  },
-  {
-    key: 'edit', label: '포트폴리오',
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L4.667 14H2v-2.667L11.333 2z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    iconActive: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L4.667 14H2v-2.667L11.333 2z" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  },
-  {
-    key: 'security', label: '계정 보안',
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7.333" width="10" height="7.333" rx="1.333" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.333 7.333V4.667a2.667 2.667 0 0 1 5.334 0v2.666" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    iconActive: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7.333" width="10" height="7.333" rx="1.333" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.333 7.333V4.667a2.667 2.667 0 0 1 5.334 0v2.666" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  },
-  {
-    key: 'privacy', label: '공개 범위',
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.375 8.232A.75.75 0 0 1 1.375 7.768 7.042 7.042 0 0 1 8 3.333a7.042 7.042 0 0 1 6.625 4.435.75.75 0 0 1 0 .464A7.042 7.042 0 0 1 8 12.667a7.042 7.042 0 0 1-6.625-4.435z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="8" r="2" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    iconActive: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.375 8.232A.75.75 0 0 1 1.375 7.768 7.042 7.042 0 0 1 8 3.333a7.042 7.042 0 0 1 6.625 4.435.75.75 0 0 1 0 .464A7.042 7.042 0 0 1 8 12.667a7.042 7.042 0 0 1-6.625-4.435z" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="8" r="2" stroke="#fff" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  },
-  {
-    key: 'delete', label: '회원 탈퇴',
-    icon: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5.333 4V2.667A1.333 1.333 0 0 1 6.667 1.333h2.666A1.333 1.333 0 0 1 10.667 2.667V4M12.667 4l-.667 9.333A1.333 1.333 0 0 1 10.667 14.667H5.333A1.333 1.333 0 0 1 4 13.333L3.333 4" stroke="#ef4444" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    iconActive: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5.333 4V2.667A1.333 1.333 0 0 1 6.667 1.333h2.666A1.333 1.333 0 0 1 10.667 2.667V4M12.667 4l-.667 9.333A1.333 1.333 0 0 1 10.667 14.667H5.333A1.333 1.333 0 0 1 4 13.333L3.333 4" stroke="#ef4444" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  },
-]
-
 
 // 개인정보 인라인 편집
 const profileEditing = ref(false)

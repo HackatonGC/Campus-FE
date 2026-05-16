@@ -135,13 +135,13 @@
             <!-- 내용 -->
             <div style="padding:20px; display:flex; flex-direction:column; flex:1;">
               <!-- 작성자 -->
-              <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
+              <RouterLink :to="`/user/${project.authorId}`" @click.stop style="display:flex; align-items:center; gap:6px; margin-bottom:10px; text-decoration:none;">
                 <div style="width:22px; height:22px; border-radius:50%; background:#ede9fe; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#6366f1; flex-shrink:0;">
                   {{ (project.authorName ?? '?').charAt(0) }}
                 </div>
                 <span style="font-size:12px; color:#9ca3af;">{{ project.authorName }}</span>
                 <span v-if="project.authorSchool" style="font-size:11px; color:#d1d5db;">· {{ project.authorSchool }}</span>
-              </div>
+              </RouterLink>
 
               <!-- 제목 -->
               <h3 style="font-size:16px; font-weight:700; color:#111827; margin:0 0 6px; line-height:1.4;">{{ project.title }}</h3>

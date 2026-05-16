@@ -120,7 +120,7 @@
 
               <!-- 우측 버튼 -->
               <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; margin-left:20px; flex-shrink:0;">
-                <button style="font-size:13px; padding:6px 16px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; font-weight:500; white-space:nowrap;">상세 보기</button>
+                <RouterLink :to="`/user/${a.userId}`" style="font-size:13px; padding:6px 16px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; font-weight:500; white-space:nowrap; text-decoration:none; display:inline-block;">상세 보기</RouterLink>
                 <div v-if="a.status === 'PENDING'" style="display:flex; gap:6px;">
                   <button @click="updateStatus(a.id, 'REJECTED')" style="font-size:13px; padding:6px 14px; border-radius:8px; border:1.5px solid #fca5a5; background:#fff; color:#ef4444; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;">
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>
