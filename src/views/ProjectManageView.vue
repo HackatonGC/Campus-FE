@@ -4,7 +4,7 @@
     <NavBar />
 
     <!-- BODY -->
-    <div style="max-width:960px; margin:0 auto; padding:32px 40px;">
+    <div style="max-width:1280px; margin:0 auto; padding:32px 40px;">
 
       <!-- 뒤로가기 + 타이틀 -->
       <RouterLink to="/mypage" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6b7280; text-decoration:none; margin-bottom:16px;">

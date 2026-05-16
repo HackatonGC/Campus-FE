@@ -236,12 +236,15 @@ const projects = ref([])
 async function fetchProjects() {
   const params = {}
   if (searchQuery.value) params.keyword = searchQuery.value
-  if (selectedTags.value.length) params.techStack = selectedTags.value
-  if (statusFilter.value) params.status = statusFilter.value
+  if (selectedTags.value.length) params.techStacks = selectedTags.value
+  if (statusFilter.value === 'RECRUITING') params.recruitingOnly = true
   if (sortOrder.value) params.sort = sortOrder.value
   try {
     const data = await getProjects(params)
-    projects.value = Array.isArray(data) ? data : []
+    const list = Array.isArray(data) ? data : []
+    projects.value = statusFilter.value === 'COMPLETED'
+      ? list.filter(p => p.status === 'COMPLETED')
+      : list
   } catch {
     projects.value = []
   }
@@ -287,8 +290,8 @@ async function toggleBookmark(projectId) {
 
 function toggleTag(tag) {
   const idx = selectedTags.value.indexOf(tag)
-  if (idx === -1) selectedTags.value.push(tag)
-  else selectedTags.value.splice(idx, 1)
+  if (idx === -1) selectedTags.value = [...selectedTags.value, tag]
+  else selectedTags.value = selectedTags.value.filter(t => t !== tag)
 }
 </script>
 

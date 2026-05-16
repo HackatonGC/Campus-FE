@@ -50,7 +50,7 @@
           :style="`display:flex; align-items:center; gap:6px; font-size:14px; padding:8px 14px; border-radius:8px; cursor:pointer; background:none; border:1px solid #d1d5db; color:${liked ? '#ef4444' : '#6b7280'};`"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" :fill="liked ? '#ef4444' : 'none'" :stroke="liked ? '#ef4444' : '#6b7280'" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          좋아요 {{ (qna.likeCount ?? 0) + (liked ? 1 : 0) }}
+          좋아요 {{ qna.likeCount ?? 0 }}
         </button>
         <button
           v-if="String(qna.authorId) === String(userId)"
@@ -168,6 +168,7 @@ function renderMarkdown(text) {
 onMounted(async () => {
   try {
     qna.value = await getQna(route.params.id)
+    liked.value = qna.value?.isLiked ?? false
   } catch {
     qna.value = null
   } finally {
@@ -222,6 +223,7 @@ async function handleLike() {
   try {
     await toggleQnaLike(route.params.id)
     liked.value = !liked.value
+    if (qna.value) qna.value.likeCount = (qna.value.likeCount ?? 0) + (liked.value ? 1 : -1)
   } catch {}
 }
 

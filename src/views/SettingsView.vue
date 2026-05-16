@@ -3,7 +3,7 @@
 
     <NavBar />
 
-    <div style="max-width:800px; margin:0 auto; padding:32px 40px;">
+    <div style="max-width:760px; margin:0 auto; padding:32px 40px;">
 
       <!-- 헤더 -->
       <div style="margin-bottom:28px;">
@@ -339,6 +339,9 @@ async function saveBasicProfile() {
       department: editDepartment.value,
     })
     user.value = { ...user.value, ...updated }
+    localStorage.setItem('userName', editName.value)
+    localStorage.setItem('userSchool', editSchool.value)
+    localStorage.setItem('userDepartment', editDepartment.value)
     profileEditing.value = false
   } catch {
     profileEditMsg.value = '저장에 실패했습니다.'

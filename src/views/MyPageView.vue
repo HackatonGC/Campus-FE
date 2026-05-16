@@ -206,7 +206,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getProjects, getMyBookmarks, getMyLikes, getMyApplications, cancelApplication, deleteProject } from '../api/project.js'
-import { getPortfolio } from '../api/user.js'
+import { getPortfolio, getUser } from '../api/user.js'
 import { userId } from '../store/auth.js'
 import { useRouter, useRoute } from 'vue-router'
 import NavBar from '../components/NavBar.vue'
@@ -237,8 +237,8 @@ const likedProjects = ref([])
 
 onMounted(async () => {
   try {
-    const portfolio = await getPortfolio(userId.value)
-    user.value.techStack = portfolio.techStacks ?? []
+    const [userInfo, portfolio] = await Promise.all([getUser(userId.value), getPortfolio(userId.value)])
+    user.value.techStack = portfolio.techStacks?.length ? portfolio.techStacks : (userInfo.techStacks ?? [])
   } catch {}
 
   try {

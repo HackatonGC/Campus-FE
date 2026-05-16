@@ -2,7 +2,7 @@
   <div style="min-height:100vh; background:#f4f4fd;">
         <NavBar />
 
-    <div style="max-width:640px; margin:0 auto; padding:48px 40px;">
+    <div style="max-width:760px; margin:0 auto; padding:48px 40px;">
       <RouterLink :to="`/project/${route.params.id}`" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6b7280; text-decoration:none; margin-bottom:24px;">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         프로젝트로 돌아가기

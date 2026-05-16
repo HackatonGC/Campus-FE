@@ -26,7 +26,7 @@
     </div>
 
     <!-- 본문 컨테이너 -->
-    <div style="max-width:860px; margin:0 auto; padding:0 24px 80px;">
+    <div style="max-width:760px; margin:0 auto; padding:0 40px 80px;">
 
       <!-- 프로젝트 메타 -->
       <div style="background:#fff; border-radius:16px; border:1px solid #e5e7eb; padding:32px; margin-top:-48px; position:relative; z-index:10;">

@@ -15,7 +15,7 @@
       <div :style="`width:100%; height:320px; position:relative; overflow:hidden; background:${project.thumbnailUrl ? '#111' : project.status === 'RECRUITING' ? 'linear-gradient(135deg,#4f46e5 0%,#6366f1 40%,#818cf8 100%)' : 'linear-gradient(135deg,#047857 0%,#059669 40%,#10b981 100%)'};`">
         <img v-if="project.thumbnailUrl" :src="project.thumbnailUrl" style="width:100%; height:100%; object-fit:cover; opacity:1;" />
         <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);"></div>
-        <div style="position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end; padding:0 40px 40px; max-width:1100px; margin:0 auto; width:100%; box-sizing:border-box;">
+        <div style="position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end; padding:0 40px 40px; max-width:1280px; margin:0 auto; width:100%; box-sizing:border-box;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
             <span v-if="project.status === 'RECRUITING'" style="background:rgba(255,255,255,0.22); color:#fff; font-size:12px; font-weight:700; padding:5px 16px; border-radius:999px; backdrop-filter:blur(6px); display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.3);">
               <span style="width:7px; height:7px; background:#fff; border-radius:50%; display:inline-block; box-shadow:0 0 0 2px rgba(255,255,255,0.4);"></span> 팀원 모집중
@@ -33,7 +33,7 @@
       </div>
 
       <!-- 본문 -->
-      <div style="max-width:1100px; margin:0 auto; padding:32px 40px 80px; display:grid; grid-template-columns:1fr 340px; gap:28px; align-items:start;">
+      <div style="max-width:1280px; margin:0 auto; padding:32px 40px 80px; display:grid; grid-template-columns:1fr 340px; gap:28px; align-items:start;">
 
         <!-- 왼쪽 메인 -->
         <div>

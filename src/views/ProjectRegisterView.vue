@@ -4,7 +4,7 @@
     <NavBar />
 
     <!-- BODY -->
-    <div style="max-width:800px; margin:0 auto; padding:48px 24px 120px;">
+    <div style="max-width:760px; margin:0 auto; padding:48px 40px 120px;">
 
       <!-- 타이틀 -->
       <div style="margin-bottom:32px;">
@@ -277,7 +277,7 @@
 
     <!-- ===== 하단 고정 버튼 ===== -->
     <div style="position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e5e7eb; z-index:40;">
-      <div style="max-width:800px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between;">
+      <div style="max-width:760px; margin:0 auto; padding:16px 40px; display:flex; align-items:center; justify-content:space-between;">
         <p style="font-size:12px; color:#9ca3af; margin:0;">* 표시된 항목은 필수 입력 사항입니다</p>
         <div style="display:flex; gap:12px;">
           <button
