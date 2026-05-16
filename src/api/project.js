@@ -3,14 +3,14 @@ import api from './axios'
 export const getProjects = (params = {}) =>
   api.get('/api/v1/projects', { params })
 
-export const getPopularTags = (limit) =>
-  api.get('/api/v1/projects/popular-tags', { params: limit ? { limit } : {} })
-
 export const getProject = (id) =>
   api.get(`/api/v1/projects/${id}`)
 
 export const createProject = (form) =>
   api.post('/api/v1/projects', form)
+
+export const updateProject = (id, form) =>
+  api.put(`/api/v1/projects/${id}`, form)
 
 export const deleteProject = (id, userId) =>
   api.delete(`/api/v1/projects/${id}`, { params: { userId } })

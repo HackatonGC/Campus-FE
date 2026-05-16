@@ -377,15 +377,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { RouterLink, useRouter, useRoute } from 'vue-router'
 import iconLogo from '../assets/Icon.svg'
 import { uploadImage } from '../utils/cloudinary.js'
-import { createProject } from '../api/project.js'
+import { createProject, updateProject, getProject } from '../api/project.js'
 import { userId } from '../store/auth.js'
 
 const DRAFT_KEY = 'stackmate_project_draft'
 const router = useRouter()
+const route = useRoute()
+const isEditMode = computed(() => !!route.params.id)
 
 const allTechOptions = [
   'React', 'Next.js', 'Vue', 'Angular',
@@ -442,7 +444,32 @@ const toast = reactive({ show: false, message: '' })
 const showDraftModal = ref(false)
 const draftSavedAt = ref('')
 
-onMounted(() => {
+const statusReverseMap = { RECRUITING: 'recruiting', DEVELOPING: 'developing', COMPLETED: 'done' }
+
+onMounted(async () => {
+  // 수정 모드 → 기존 데이터 로드
+  if (isEditMode.value) {
+    try {
+      const data = await getProject(route.params.id)
+      form.title = data.title ?? ''
+      form.summary = data.summary ?? ''
+      form.body = data.description ?? ''
+      form.techStack = [...(data.techStacks ?? [])]
+      form.githubUrl = data.githubUrl ?? ''
+      form.deployUrl = data.deployUrl ?? ''
+      form.figmaUrl = data.figmaUrl ?? ''
+      form.notionUrl = data.notionUrl ?? ''
+      form.status = statusReverseMap[data.status] ?? 'recruiting'
+      form.thumbnailUrl = data.thumbnailUrl ?? ''
+      thumbnailPreview.value = data.thumbnailUrl ?? ''
+      form.roles = (data.recruitments ?? []).map(r => ({ name: r.role, count: r.count, description: r.description ?? '' }))
+      if (form.roles.length === 0) form.roles = [{ name: '', count: 1, description: '' }]
+    } catch {
+      showToast('프로젝트 정보를 불러오지 못했습니다.')
+    }
+    return
+  }
+
   // 미리보기에서 돌아온 경우 → 모달 없이 바로 복원
   if (history.state?.fromPreview) {
     history.replaceState({}, '')
@@ -537,7 +564,7 @@ function preview() {
 async function submit() {
   if (!form.title.trim()) return showToast('프로젝트 제목을 입력해주세요')
   if (!form.summary.trim()) return showToast('한 줄 소개를 입력해주세요')
-  if (!form.description.trim()) return showToast('프로젝트 상세 설명을 입력해주세요')
+  if (!isEditMode.value && !form.description.trim()) return showToast('프로젝트 상세 설명을 입력해주세요')
   if (form.techStack.length === 0) return showToast('기술 스택을 하나 이상 선택해주세요')
   if (!form.body.trim()) return showToast('프로젝트 상세 내용을 입력해주세요')
 
@@ -560,10 +587,14 @@ async function submit() {
         .filter(r => r.name.trim())
         .map(r => ({ role: r.name, count: r.count, description: r.description || null })),
     }
-    console.log('[등록 payload]', payload)
-    await createProject(payload)
-    localStorage.removeItem(DRAFT_KEY)
-    router.push({ path: '/', state: { registered: true } })
+    if (isEditMode.value) {
+      await updateProject(route.params.id, payload)
+      router.push(`/project/${route.params.id}`)
+    } else {
+      await createProject(payload)
+      localStorage.removeItem(DRAFT_KEY)
+      router.push({ path: '/', state: { registered: true } })
+    }
   } catch (e) {
     console.error('[등록 실패]', e.response?.status, e.response?.data)
     showToast('등록에 실패했습니다. 다시 시도해주세요.')

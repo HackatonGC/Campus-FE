@@ -17,13 +17,7 @@
             <div style="color:#9ca3af; font-size:11px;">함께 성장하는 개발자</div>
           </div>
         </RouterLink>
-        <div style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-          <div style="text-align:right;">
-            <div style="font-weight:600; font-size:14px; color:#111827;">김개발</div>
-            <div style="font-size:12px; color:#9ca3af;">가천대학교</div>
-          </div>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+        <RouterLink to="/mypage" style="font-size:13px; color:#6b7280; text-decoration:none;">마이페이지</RouterLink>
       </div>
     </nav>
 
@@ -45,11 +39,11 @@
             <span v-if="project.status === 'RECRUITING'" style="font-size:11px; background:#10b981; color:#fff; padding:2px 10px; border-radius:999px; font-weight:600;">모집중</span>
           </div>
           <div style="display:flex; gap:8px;">
-            <button style="font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500;">
+            <RouterLink :to="`/project/${route.params.id}/edit`" style="font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500; text-decoration:none;">
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L5.333 13.333 2 14l.667-3.333L11.333 2z" stroke="#374151" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
               수정
-            </button>
-            <button style="font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid #fee2e2; background:#fff; color:#ef4444; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500;">
+            </RouterLink>
+            <button @click="handleDelete" style="font-size:13px; padding:6px 14px; border-radius:8px; border:1px solid #fee2e2; background:#fff; color:#ef4444; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:500;">
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M5.333 4V2.667A1.333 1.333 0 0 1 6.667 1.333h2.666A1.333 1.333 0 0 1 10.667 2.667V4M12.667 4l-.667 9.333A1.333 1.333 0 0 1 10.667 14.667H5.333A1.333 1.333 0 0 1 4 13.333L3.333 4" stroke="#ef4444" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
               삭제
             </button>
@@ -62,17 +56,18 @@
       </div>
 
       <!-- 모집 현황 -->
-      <div style="background:#fff; border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,0.06); margin-bottom:20px;">
+      <div v-if="(project.recruitments ?? []).length" style="background:#fff; border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,0.06); margin-bottom:20px;">
         <h2 style="font-size:15px; font-weight:700; color:#111827; margin:0 0 16px;">모집 현황</h2>
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
-          <div v-for="slot in project.slots" :key="slot.role"
-            :style="slot.current >= slot.total
+          <div v-for="r in project.recruitments" :key="r.role"
+            :style="(r.acceptedCount ?? 0) >= r.count
               ? 'background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; padding:16px;'
               : 'background:#f9fafb; border:1.5px solid #f3f4f6; border-radius:12px; padding:16px;'"
           >
-            <div style="font-size:13px; color:#6b7280; margin-bottom:6px;">{{ slot.role }}</div>
-            <div style="font-size:24px; font-weight:700; color:#111827; margin-bottom:8px;">{{ slot.current }}/{{ slot.total }}</div>
-            <span v-if="slot.current >= slot.total" style="font-size:11px; background:#10b981; color:#fff; padding:2px 10px; border-radius:999px; font-weight:600;">모집완료</span>
+            <div style="font-size:13px; color:#6b7280; margin-bottom:6px;">{{ r.role }}</div>
+            <div style="font-size:24px; font-weight:700; color:#111827; margin-bottom:8px;">{{ r.acceptedCount ?? 0 }}/{{ r.count }}</div>
+            <span v-if="(r.acceptedCount ?? 0) >= r.count" style="font-size:11px; background:#10b981; color:#fff; padding:2px 10px; border-radius:999px; font-weight:600;">모집완료</span>
+            <span v-else style="font-size:11px; color:#9ca3af;">{{ r.count - (r.acceptedCount ?? 0) }}명 남음</span>
           </div>
         </div>
       </div>
@@ -166,10 +161,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { getProject, getProjectApplications, updateApplicationStatus } from '../api/project.js'
+import { useRoute, useRouter } from 'vue-router'
+import { getProject, getProjectApplications, updateApplicationStatus, deleteProject } from '../api/project.js'
+import { userId } from '../store/auth.js'
 
 const route = useRoute()
+const router = useRouter()
 const project = ref({})
 const applicants = ref([])
 
@@ -180,6 +177,7 @@ onMounted(async () => {
   try {
     const data = await getProjectApplications(route.params.id)
     applicants.value = Array.isArray(data) ? data : []
+    console.log('[지원자 데이터]', applicants.value[0])
   } catch {}
 })
 
@@ -196,11 +194,25 @@ const filteredApplicants = computed(() =>
   activeTab.value === '전체' ? applicants.value : applicants.value.filter(a => a.status === activeTab.value)
 )
 
+async function handleDelete() {
+  if (!confirm('프로젝트를 삭제할까요?')) return
+  try {
+    await deleteProject(route.params.id, userId.value)
+    router.push('/mypage')
+  } catch (e) {
+    console.error('[삭제 실패]', e?.response?.status, e?.response?.data)
+    alert('삭제에 실패했습니다.')
+  }
+}
+
 async function updateStatus(applicationId, status) {
   try {
     await updateApplicationStatus(route.params.id, applicationId, status)
     const a = applicants.value.find(a => a.id === applicationId)
     if (a) a.status = status
-  } catch {}
+  } catch (e) {
+    console.error('[지원 상태 변경 실패]', e?.response?.status, e?.response?.data)
+    alert(`처리 실패: ${e?.response?.status ?? '알 수 없는 오류'}`)
+  }
 }
 </script>
