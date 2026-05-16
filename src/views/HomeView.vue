@@ -16,8 +16,50 @@
         </div>
         <!-- 메뉴 (비활성화) -->
         <div></div>
-        <!-- 로그인 -->
-        <RouterLink to="/login" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; text-decoration:none; cursor:pointer;">
+
+        <!-- 프로필 드롭다운 (로그인) -->
+        <div v-if="isLoggedIn" style="position:relative;" data-profile>
+          <button @click="profileOpen = !profileOpen" style="display:flex; align-items:center; gap:8px; background:none; border:none; cursor:pointer; padding:6px 8px; border-radius:10px;" :style="profileOpen ? 'background:#f4f4fd;' : ''">
+            <div style="text-align:right;">
+              <div style="font-size:14px; font-weight:600; color:#111827;">{{ userName }}</div>
+              <div v-if="userSchool" style="font-size:11px; color:#9ca3af;">{{ userSchool }}</div>
+            </div>
+            <svg style="width:14px; height:14px; color:#9ca3af; transition:transform 0.2s;" :style="profileOpen ? 'transform:rotate(180deg)' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <!-- 드롭다운 메뉴 -->
+          <div v-if="profileOpen" style="position:absolute; right:0; top:calc(100% + 8px); width:220px; background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,0.1); padding:8px; z-index:100;">
+            <!-- 유저 정보 -->
+            <div style="padding:12px 16px 10px; border-bottom:1px solid #f3f4f6; margin-bottom:4px;">
+              <div style="font-size:15px; font-weight:700; color:#111827;">{{ userName }}</div>
+              <div v-if="userSchool" style="font-size:12px; color:#6b7280; margin-top:2px;">{{ userSchool }}</div>
+            </div>
+            <!-- 메뉴 항목 -->
+            <RouterLink to="/mypage" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">
+              <img :src="iconProject" style="width:15px; height:15px;" /> 내 프로젝트
+            </RouterLink>
+            <RouterLink to="/mypage" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">
+              <img :src="iconTeam" style="width:15px; height:15px;" /> 지원한 프로젝트
+            </RouterLink>
+            <RouterLink to="/mypage" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">
+              <img :src="iconBookmark" style="width:15px; height:15px;" /> 북마크
+            </RouterLink>
+            <RouterLink to="/mypage" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">
+              <img :src="iconLike" style="width:15px; height:15px;" /> 좋아요
+            </RouterLink>
+            <RouterLink to="/settings" @click="profileOpen=false" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#374151; text-decoration:none; border-radius:10px;" onmouseover="this.style.background='#f4f4fd'" onmouseout="this.style.background='none'">
+              <svg style="width:15px; height:15px; color:#6b7280;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              설정
+            </RouterLink>
+            <div style="border-top:1px solid #f3f4f6; margin:4px 0;"></div>
+            <button @click="clearAuth(); $router.push('/login')" style="width:100%; display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:14px; color:#ef4444; background:none; border:none; cursor:pointer; border-radius:10px; text-align:left;" onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='none'">
+              <img :src="iconLogout" style="width:15px; height:15px;" /> 로그아웃
+            </button>
+          </div>
+        </div>
+
+        <!-- 로그인 버튼 (비로그인) -->
+        <RouterLink v-else to="/login" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; text-decoration:none;">
           <img :src="iconLogout" style="width:16px; height:16px;" alt="" /> 로그인
         </RouterLink>
       </div>
@@ -135,37 +177,37 @@
             <div style="padding:24px; display:flex; flex-direction:column; flex:1;">
               <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px;">
                 <h3 style="font-size:18px; font-weight:700; color:#111827; margin:0;">{{ project.title }}</h3>
-                <span v-if="project.isRecruiting" style="flex-shrink:0; margin-left:8px; background:#10b981; color:#fff; font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px;">
+                <span v-if="project.status === 'RECRUITING'" style="flex-shrink:0; margin-left:8px; background:#10b981; color:#fff; font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px;">
                   모집중
                 </span>
               </div>
               <p style="font-size:13px; color:#6b7280; line-height:1.6; margin:0 0 16px; flex:1;">{{ project.summary }}</p>
               <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px;">
                 <span
-                  v-for="tech in project.techStack.slice(0, 4)"
+                  v-for="tech in (project.techStacks ?? project.techStack ?? []).slice(0, 4)"
                   :key="tech"
                   style="font-size:12px; padding:4px 12px; border-radius:999px; border:1px solid #c7d2fe; color:#4338CA; background:#F0F1FF;"
                 >
                   {{ tech }}
                 </span>
-                <span v-if="project.techStack.length > 4" style="font-size:12px; color:#9ca3af; display:flex; align-items:center;">
-                  +{{ project.techStack.length - 4 }}
+                <span v-if="(project.techStacks ?? project.techStack ?? []).length > 4" style="font-size:12px; color:#9ca3af; display:flex; align-items:center;">
+                  +{{ (project.techStacks ?? project.techStack ?? []).length - 4 }}
                 </span>
               </div>
               <div style="display:flex; align-items:center; gap:16px; font-size:12px; color:#9ca3af; margin-bottom:16px;">
                 <span style="display:flex; align-items:center; gap:4px;">
                   <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path v-if="project.isTeam" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path v-if="project.projectType === 'TEAM'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                   </svg>
-                  {{ project.isTeam ? '팀' : '개인' }}
+                  {{ project.projectType === 'TEAM' ? '팀' : '개인' }}
                 </span>
                 <span style="display:flex; align-items:center; gap:4px;">
                   <svg style="width:14px; height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                   </svg>
-                  {{ project.views }}
+                  {{ project.viewCount ?? project.views ?? 0 }}
                 </span>
               </div>
               <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid #f3f4f6; padding-top:14px;">
@@ -204,8 +246,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { projects, techOptions } from '../data/dummy.js'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { techOptions } from '../data/dummy.js'
+import { getProjects } from '../api/project.js'
+import { isLoggedIn, clearAuth } from '../store/auth.js'
+import iconBookmark from '../assets/Icon (10).svg'
+import iconLike     from '../assets/Icon (9).svg'
 
 import iconLogo    from '../assets/Icon.svg'
 import iconProject from '../assets/Icon (1).svg'
@@ -215,16 +261,33 @@ import iconLogout  from '../assets/Icon (4).svg'
 import iconTrend   from '../assets/Icon (5).svg'
 import iconFilter  from '../assets/Icon (6).svg'
 
+const profileOpen = ref(false)
+const userName = localStorage.getItem('userName') ?? '사용자'
+const userSchool = localStorage.getItem('userSchool') ?? ''
+
+function closeProfile(e) {
+  if (!e.target.closest('[data-profile]')) profileOpen.value = false
+}
+onMounted(() => document.addEventListener('click', closeProfile))
+onUnmounted(() => document.removeEventListener('click', closeProfile))
+
 const searchQuery = ref('')
 const selectedTags = ref([])
 const onlyRecruiting = ref(false)
 const toast = ref({ show: false, message: '' })
+const projects = ref([])
 
-onMounted(() => {
+onMounted(async () => {
   if (history.state?.registered) {
     toast.value = { show: true, message: '프로젝트가 등록되었습니다! 🎉' }
     setTimeout(() => { toast.value.show = false }, 3000)
     history.replaceState({}, '')
+  }
+  try {
+    const data = await getProjects()
+    projects.value = Array.isArray(data) ? data : []
+  } catch {
+    projects.value = []
   }
 })
 
@@ -237,19 +300,20 @@ function toggleTag(tag) {
 }
 
 const filteredProjects = computed(() => {
-  return projects.filter(p => {
+  return projects.value.filter(p => {
     const q = searchQuery.value.replace(/\s/g, '').toLowerCase()
+    const stacks = p.techStacks ?? p.techStack ?? []
     const matchesSearch = !q ||
-      p.title.replace(/\s/g, '').toLowerCase().includes(q) ||
-      p.summary.replace(/\s/g, '').toLowerCase().includes(q) ||
-      p.techStack.some(t => t.replace(/\s/g, '').toLowerCase().includes(q))
+      (p.title ?? '').replace(/\s/g, '').toLowerCase().includes(q) ||
+      (p.summary ?? '').replace(/\s/g, '').toLowerCase().includes(q) ||
+      stacks.some(t => t.replace(/\s/g, '').toLowerCase().includes(q))
 
     const matchesTags = selectedTags.value.length === 0 ||
       selectedTags.value.some(tag =>
-        p.techStack.some(t => t.toLowerCase().includes(tag.toLowerCase()))
+        stacks.some(t => t.toLowerCase().includes(tag.toLowerCase()))
       )
 
-    const matchesRecruiting = !onlyRecruiting.value || p.isRecruiting
+    const matchesRecruiting = !onlyRecruiting.value || p.status === 'RECRUITING'
 
     return matchesSearch && matchesTags && matchesRecruiting
   })

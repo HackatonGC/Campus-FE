@@ -2,7 +2,7 @@
   <div class="min-h-screen flex flex-col items-center justify-center" style="background: #eeeeff">
 
     <!-- Logo (카드 밖) -->
-    <RouterLink to="/" class="flex items-center justify-center gap-3">
+    <div class="flex items-center justify-center gap-3">
       <div
         class="w-12 h-12 rounded-xl flex items-center justify-center"
         style="background: #6366f1"
@@ -14,7 +14,7 @@
         </svg>
       </div>
       <span class="text-2xl font-bold" style="color: #6366f1">StackMate</span>
-    </RouterLink>
+    </div>
 
     <!-- 공백 -->
     <div class="h-[20px]"></div>
@@ -95,6 +95,7 @@
           <!-- 공백 -->
           <div class="h-[20px]"></div>
 
+          <p v-if="loginError" style="color:#ef4444; font-size:13px; margin-bottom:8px;">{{ loginError }}</p>
           <button
             type="submit"
             class="w-[400px] h-[44px] rounded-xl text-white text-sm font-semibold transition hover:opacity-90 active:scale-[0.98]"
@@ -140,7 +141,7 @@
               <input
                 v-model="signupSchool"
                 type="text"
-                placeholder="가천대학교"
+                placeholder="서울대학교"
                 class="rounded-xl text-sm outline-none transition"
                 style="display: flex; width: 100%; height: 44px; padding: 4px 12px; align-items: center; background: #F9FAFB; color: #111827"
               />
@@ -172,9 +173,8 @@
             />
             <button
               type="button"
-              :class="['rounded-xl text-sm font-medium transition-all hover:opacity-90', verifyClicked ? 'verify-pop' : '']"
+              class="rounded-xl text-sm font-medium transition hover:opacity-90"
               style="height: 44px; padding-left: 21px; padding-right: 21px; border: 1.5px solid #e5e7eb; color: #374151; white-space: nowrap"
-              @click="handleVerify"
             >인증</button>
           </div>
 
@@ -219,6 +219,7 @@
           <!-- 공백 -->
           <div class="h-[15px]"></div>
 
+          <p v-if="signupError" style="color:#ef4444; font-size:13px; margin-bottom:8px;">{{ signupError }}</p>
           <button
             type="submit"
             class="w-[400px] h-[44px] rounded-xl text-white text-sm font-semibold transition hover:opacity-90 active:scale-[0.98]"
@@ -233,13 +234,18 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { login, signup } from '../api/user.js'
+import { setAuth } from '../store/auth.js'
 
+const router = useRouter()
 const activeTab = ref('login')
 
 // 로그인
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const loginError = ref('')
 
 // 회원가입
 const signupName = ref('')
@@ -247,20 +253,8 @@ const signupSchool = ref('')
 const signupDept = ref('')
 const signupEmail = ref('')
 const signupPassword = ref('')
-const verifyClicked = ref(false)
-
-function handleVerify() {
-  verifyClicked.value = true
-  setTimeout(() => { verifyClicked.value = false }, 2000)
-}
-const techOptions = [
-  'React', 'Next.js', 'Vue', 'Angular',
-  'Spring', 'Spring Boot', 'Node.js', 'Express', 'Django', 'FastAPI',
-  'Android', 'iOS', 'Flutter', 'React Native',
-  'Unity', 'Unreal', 'AI/ML', 'TensorFlow', 'PyTorch',
-  'MySQL', 'PostgreSQL', 'MongoDB', 'Redis',
-  'Docker', 'Kubernetes', 'AWS', 'Firebase'
-]
+const signupError = ref('')
+const techOptions = ['React', 'Spring', 'Android', 'Unity', 'Python', 'Vue', 'Flutter', 'Node.js', 'Swift', 'Kotlin']
 const selectedTech = ref([])
 
 function toggleTech(tag) {
@@ -271,27 +265,35 @@ function toggleTech(tag) {
   }
 }
 
-function handleLogin() {
-  console.log('login', email.value, password.value)
+async function handleLogin() {
+  loginError.value = ''
+  try {
+    const data = await login(email.value, password.value)
+    console.log('[로그인 응답]', data)
+    setAuth(data.token, data.userId)
+    if (data.name) localStorage.setItem('userName', data.name)
+    router.push('/')
+  } catch (e) {
+    loginError.value = '이메일 또는 비밀번호가 올바르지 않습니다.'
+  }
 }
 
-function handleSignup() {
-  console.log('signup', signupName.value, signupEmail.value, selectedTech.value)
+async function handleSignup() {
+  signupError.value = ''
+  try {
+    await signup({
+      email: signupEmail.value,
+      password: signupPassword.value,
+      name: signupName.value,
+      school: signupSchool.value,
+      department: signupDept.value,
+      techStacks: selectedTech.value,
+    })
+    activeTab.value = 'login'
+    email.value = signupEmail.value
+  } catch (e) {
+    signupError.value = '회원가입에 실패했습니다. 다시 시도해주세요.'
+  }
 }
 </script>
-
-<style scoped>
-@keyframes pop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(0.92); }
-  70%  { transform: scale(1.06); }
-  100% { transform: scale(1); }
-}
-.verify-pop {
-  animation: pop 0.3s ease;
-  background: #ede9fe;
-  color: #6366f1;
-  border-color: #6366f1;
-}
-</style>
 

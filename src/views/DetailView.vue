@@ -13,9 +13,12 @@
             <div style="color:#9ca3af; font-size:11px; line-height:1.2;">함께 성장하는 개발자</div>
           </div>
         </RouterLink>
-        <button style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; background:none; border:none; cursor:pointer;">
-          <img :src="iconLogout" style="width:16px; height:16px;" alt="" /> 로그인
+        <button v-if="isLoggedIn" @click="clearAuth(); $router.push('/login')" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; background:none; border:none; cursor:pointer;">
+          <img :src="iconLogout" style="width:16px; height:16px;" alt="" /> 로그아웃
         </button>
+        <RouterLink v-else to="/login" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#4b5563; text-decoration:none;">
+          <img :src="iconLogout" style="width:16px; height:16px;" alt="" /> 로그인
+        </RouterLink>
       </div>
     </nav>
 
@@ -31,15 +34,15 @@
 
         <!-- 뱃지 + 제목 -->
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-          <span v-if="project.isRecruiting" style="background:#10b981; color:#fff; font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px;">모집중</span>
-          <span style="background:#F0F1FF; color:#4338CA; font-size:12px; font-weight:500; padding:3px 10px; border-radius:999px;">{{ project.isTeam ? '팀 프로젝트' : '개인 프로젝트' }}</span>
+          <span v-if="project.status === 'RECRUITING'" style="background:#10b981; color:#fff; font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px;">모집중</span>
+          <span style="background:#F0F1FF; color:#4338CA; font-size:12px; font-weight:500; padding:3px 10px; border-radius:999px;">{{ project.projectType === 'TEAM' ? '팀 프로젝트' : '개인 프로젝트' }}</span>
         </div>
         <h1 style="font-size:32px; font-weight:800; color:#111827; margin:0 0 8px;">{{ project.title }}</h1>
         <p style="font-size:16px; color:#6b7280; margin:0 0 20px;">{{ project.summary }}</p>
 
         <!-- 기술 태그 -->
         <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
-          <span v-for="tech in project.techStack" :key="tech"
+          <span v-for="tech in (project.techStacks ?? project.techStack ?? [])" :key="tech"
             style="font-size:13px; padding:5px 14px; border-radius:999px; background:#F0F1FF; color:#4338CA; border:1px solid #c7d2fe;">
             {{ tech }}
           </span>
@@ -49,77 +52,26 @@
         <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 0; border-top:1px solid #f3f4f6; border-bottom:1px solid #f3f4f6; margin-bottom:40px;">
           <div style="display:flex; align-items:center; gap:12px;">
             <div style="width:40px; height:40px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#4338CA;">
-              {{ project.author.charAt(0) }}
+              {{ (project.authorName ?? project.author ?? '?').charAt(0) }}
             </div>
             <div>
-              <div style="font-size:14px; font-weight:600; color:#111827;">{{ project.author }}</div>
+              <div style="font-size:14px; font-weight:600; color:#111827;">{{ project.authorName ?? project.author }}</div>
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:20px; font-size:13px; color:#9ca3af;">
-            <span>👁 {{ project.views }}</span>
-            <span>❤️ {{ project.likes }}</span>
+            <span>👁 {{ project.viewCount ?? project.views ?? 0 }}</span>
+            <span>❤️ {{ project.likeCount ?? project.likes ?? 0 }}</span>
           </div>
         </div>
 
-        <!-- 프로젝트 소개 -->
-        <section style="margin-bottom:40px;">
-          <h2 style="font-size:20px; font-weight:700; color:#111827; margin:0 0 16px; display:flex; align-items:center; gap:8px;">
-            🗂 프로젝트 소개
-          </h2>
-          <p style="font-size:15px; color:#374151; line-height:1.8; margin:0;">{{ project.description }}</p>
-        </section>
-
-        <!-- 주요 기능 -->
-        <section style="margin-bottom:40px;">
-          <h2 style="font-size:20px; font-weight:700; color:#111827; margin:0 0 16px; display:flex; align-items:center; gap:8px;">
-            ✨ 주요 기능
-          </h2>
-          <ul style="margin:0; padding-left:20px; display:flex; flex-direction:column; gap:10px;">
-            <li v-for="(feature, i) in demoFeatures" :key="i" style="font-size:15px; color:#374151; line-height:1.6;">
-              {{ feature }}
-            </li>
-          </ul>
-        </section>
-
-        <!-- 기술 스택 & 아키텍처 -->
-        <section style="margin-bottom:40px;">
-          <h2 style="font-size:20px; font-weight:700; color:#111827; margin:0 0 16px; display:flex; align-items:center; gap:8px;">
-            ⚙️ 기술 스택 &amp; 아키텍처
-          </h2>
-          <p style="font-size:15px; color:#374151; line-height:1.8; margin:0;">{{ project.learned }}</p>
-        </section>
-
-        <!-- 시연 화면 -->
-        <section v-if="project.demoImages && project.demoImages.length" style="margin-bottom:40px;">
-          <h2 style="font-size:20px; font-weight:700; color:#111827; margin:0 0 16px; display:flex; align-items:center; gap:8px;">
-            🖥 시연 화면
-          </h2>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-            <img v-for="(img, i) in project.demoImages" :key="i" :src="img" style="width:100%; border-radius:12px; object-fit:cover;" />
-          </div>
-        </section>
-
-        <!-- 트러블 슈팅 -->
-        <section style="margin-bottom:40px;">
-          <h2 style="font-size:20px; font-weight:700; color:#111827; margin:0 0 16px; display:flex; align-items:center; gap:8px;">
-            🔥 트러블 슈팅
-          </h2>
-          <p style="font-size:15px; color:#374151; line-height:1.8; margin:0;">{{ project.hardPart }}</p>
-        </section>
-
-        <!-- 코드 예시 -->
-        <section style="margin-bottom:40px;">
-          <h2 style="font-size:20px; font-weight:700; color:#111827; margin:0 0 16px; display:flex; align-items:center; gap:8px;">
-            &lt;/&gt; 코드 예시
-          </h2>
-          <pre style="background:#1e1e2e; color:#cdd6f4; border-radius:12px; padding:24px; font-size:13px; line-height:1.7; overflow-x:auto; margin:0;">{{ codeExample }}</pre>
-        </section>
+        <!-- 프로젝트 상세 내용 -->
+        <section class="markdown-body" style="margin-bottom:40px;" v-html="renderedDescription"></section>
 
         <!-- 액션바 -->
         <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 0; border-top:1px solid #f3f4f6; border-bottom:1px solid #f3f4f6; margin-bottom:40px;">
           <div style="display:flex; align-items:center; gap:10px;">
             <button @click="liked = !liked" :style="`display:flex; align-items:center; gap:6px; font-size:14px; padding:8px 14px; border-radius:8px; cursor:pointer; background:none; border:1px solid #d1d5db; color:${liked ? '#ef4444' : '#6b7280'};`">
-              <img :src="iconLike" style="width:16px; height:16px;" alt="" /> 좋아요 {{ project.likes + (liked ? 1 : 0) }}
+              <img :src="iconLike" style="width:16px; height:16px;" alt="" /> 좋아요 {{ (project.likeCount ?? project.likes ?? 0) + (liked ? 1 : 0) }}
             </button>
             <button @click="bookmarked = !bookmarked" :style="`display:flex; align-items:center; gap:6px; font-size:14px; padding:8px 14px; border-radius:8px; cursor:pointer; background:none; border:1px solid #d1d5db; color:${bookmarked ? '#6366f1' : '#6b7280'};`">
               <img :src="iconBookmark" style="width:16px; height:16px;" alt="" /> 북마크
@@ -129,32 +81,32 @@
             </button>
           </div>
           <div style="display:flex; align-items:center; gap:12px;">
-            <a :href="project.githubUrl" target="_blank" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#6b7280; text-decoration:none; padding:8px 14px; border:1px solid #e5e7eb; border-radius:8px;">
+            <a v-if="project.githubUrl" :href="project.githubUrl" target="_blank" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#6b7280; text-decoration:none; padding:8px 14px; border:1px solid #e5e7eb; border-radius:8px;">
               🐙 GitHub
             </a>
-            <button style="display:flex; align-items:center; gap:6px; font-size:14px; color:#6b7280; background:none; border:1px solid #e5e7eb; border-radius:8px; padding:8px 14px; cursor:pointer;">
+            <a v-if="project.deployUrl" :href="project.deployUrl" target="_blank" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#6b7280; text-decoration:none; padding:8px 14px; border:1px solid #e5e7eb; border-radius:8px;">
               🚀 데모
-            </button>
+            </a>
           </div>
         </div>
 
         <!-- 팀원 모집 -->
-        <section v-if="project.isRecruiting" style="background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:24px; margin-bottom:40px;">
+        <section v-if="project.status === 'RECRUITING'" style="background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:24px; margin-bottom:40px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
             <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0; display:flex; align-items:center; gap:8px;">
               <img :src="iconTeam" style="width:20px; height:20px;" alt="" /> 팀원 모집
             </h2>
-            <span style="font-size:12px; color:#9ca3af;">마감일 2024.06.30</span>
+            <span style="font-size:12px; color:#9ca3af;"></span>
           </div>
           <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px;">
-            <div v-for="role in roles" :key="role.name" style="background:#FAFBFF; border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
-              <div style="font-size:14px; font-weight:600; color:#111827; margin-bottom:4px;">{{ role.name }}</div>
-              <div style="font-size:12px; color:#9ca3af; margin-bottom:8px;">{{ role.current }}/{{ role.max }}</div>
-              <div style="font-size:12px; color:#6b7280;">{{ role.desc }}</div>
+            <div v-for="r in (project.recruitments ?? [])" :key="r.role" style="background:#FAFBFF; border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
+              <div style="font-size:14px; font-weight:600; color:#111827; margin-bottom:4px;">{{ r.role }}</div>
+              <div style="font-size:12px; color:#9ca3af; margin-bottom:8px;">{{ r.count }}명 모집</div>
+              <div v-if="r.description" style="font-size:12px; color:#6b7280;">{{ r.description }}</div>
             </div>
           </div>
           <div style="display:flex; align-items:center; justify-content:space-between;">
-            <span style="font-size:13px; color:#9ca3af;">전체 {{ totalApplicants }}명이 지원했습니다</span>
+            <span style="font-size:13px; color:#9ca3af;"></span>
             <RouterLink :to="`/project/${project.id}/apply`" style="background:#6366f1; color:#fff; font-size:14px; font-weight:600; padding:10px 24px; border-radius:10px; text-decoration:none; display:flex; align-items:center; gap:6px; border:1px solid #d1d5db;">
               <img :src="iconTeam" style="width:16px; height:16px; filter:brightness(0) invert(1);" alt="" /> 팀원 지원하기
             </RouterLink>
@@ -202,6 +154,10 @@
       </div>
     </div>
 
+    <!-- 로딩 중 -->
+    <div v-else-if="loading" style="text-align:center; padding:120px 40px; color:#9ca3af; font-size:16px;">
+      불러오는 중...
+    </div>
     <!-- 프로젝트 없을 때 -->
     <div v-else style="text-align:center; padding:120px 40px; color:#9ca3af; font-size:16px;">
       프로젝트를 찾을 수 없어요.
@@ -211,60 +167,43 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { projects } from '../data/dummy.js'
+import { getProject } from '../api/project.js'
+import { marked } from 'marked'
 
 import iconLogo   from '../assets/Icon.svg'
 import iconLogout from '../assets/Icon (4).svg'
+import { isLoggedIn, clearAuth } from '../store/auth.js'
 import iconTeam    from '../assets/Icon (3).svg'
 import iconComment  from '../assets/Icon (7).svg'
 import iconLike     from '../assets/Icon (9).svg'
 import iconBookmark from '../assets/Icon (10).svg'
 
 const route = useRoute()
-const project = computed(() => projects.find(p => p.id === Number(route.params.id)))
+const project = ref(null)
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    project.value = await getProject(route.params.id)
+  } catch {
+    project.value = null
+  } finally {
+    loading.value = false
+  }
+})
+
+const renderedDescription = computed(() =>
+  project.value?.description ? marked(project.value.description) : ''
+)
 
 const liked = ref(false)
 const bookmarked = ref(false)
 const newComment = ref('')
 
-const comments = ref([
-  { author: '이개발', time: '12시간 전', text: '프로젝트 정말 멋지네요! WebSocket 부분이 특히 인상적입니다. Redis Pub/Sub에 대해 좀 더 자세히 설명해줄 수 있나요?', likes: 3 },
-  { author: '김개발', time: '학생대 · 14시간 전', text: '감사합니다! Redis Pub/Sub은 각 서버 인스턴스가 채널을 구독하고, 메시지가 발행되면 모든 구독자에게 전달되는 방식이에요. 자세한 내용은 GitHub 문서에 첨부해뒀습니다!', likes: 2 },
-  { author: '박수빈', time: '5시간 전', text: 'Spring Boot 채팅 프로젝트를 하려고 찾는데 많은 도움이 될 것 같아요. 팀원 모집하신다면 꼭 지원하고 싶습니다!', likes: 1 },
-])
+const comments = ref([])
 
-const demoFeatures = [
-  '실시간 1:1 채팅 및 그룹 채팅',
-  '읽음 표시 및 타이핑 인디케이터',
-  '이미지 및 파일 전송 기능',
-  '채팅방 검색 및 필터링',
-  '알림 시스템 (앱 푸시)',
-]
-
-const codeExample = `// WebSocket 연결 설정
-const connectWebSocket = () => {
-  const socket = new SockJS('/ws');
-  const stompClient = Stomp.over(socket);
-
-  stompClient.connect({}, (frame) => {
-    console.log('Connected: ' + frame);
-
-    stompClient.subscribe('/topic/messages', (message) => {
-      const msg = JSON.parse(message.body);
-      displayMessage(msg);
-    });
-  });
-};`
-
-const roles = [
-  { name: 'Frontend', current: 1, max: 2, desc: '1명 모집' },
-  { name: 'Backend', current: 0, max: 1, desc: '1명 모집' },
-  { name: 'AI Engineer', current: 0, max: 1, desc: '1명 모집' },
-]
-
-const totalApplicants = computed(() => roles.reduce((sum, r) => sum + r.current, 0))
 
 function addComment() {
   if (!newComment.value.trim()) return
@@ -277,3 +216,15 @@ function addComment() {
   newComment.value = ''
 }
 </script>
+
+<style scoped>
+.markdown-body :deep(h2) { font-size: 18px; font-weight: 700; color: #111827; margin: 28px 0 12px; }
+.markdown-body :deep(h3) { font-size: 16px; font-weight: 600; color: #374151; margin: 20px 0 8px; }
+.markdown-body :deep(p) { font-size: 15px; color: #374151; line-height: 1.8; margin: 0 0 12px; }
+.markdown-body :deep(ul), .markdown-body :deep(ol) { padding-left: 20px; margin: 0 0 12px; }
+.markdown-body :deep(li) { font-size: 15px; color: #374151; line-height: 1.8; }
+.markdown-body :deep(pre) { background: #1e1e2e; color: #cdd6f4; border-radius: 12px; padding: 20px; font-size: 13px; line-height: 1.7; overflow-x: auto; margin: 16px 0; }
+.markdown-body :deep(code) { background: #f3f4f6; color: #6366f1; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+.markdown-body :deep(pre code) { background: none; color: inherit; padding: 0; }
+.markdown-body :deep(blockquote) { border-left: 3px solid #6366f1; padding-left: 16px; color: #6b7280; margin: 16px 0; }
+</style>
