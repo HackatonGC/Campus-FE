@@ -14,21 +14,7 @@
       >← 돌아가기</button>
     </div>
 
-    <!-- NAV -->
-    <nav style="background:#fff; border-bottom:1px solid #e5e7eb; position:sticky; top:38px; z-index:50;">
-      <div style="max-width:1280px; margin:0 auto; padding:0 40px; height:68px; display:flex; align-items:center; justify-content:space-between;">
-        <RouterLink to="/" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
-          <div style="width:44px; height:44px; background:#6366f1; border-radius:12px; display:flex; align-items:center; justify-content:center;">
-            <img :src="iconLogo" style="width:28px; height:28px;" alt="StackMate" />
-          </div>
-          <div>
-            <div style="font-weight:700; font-size:16px; line-height:1.2; background:linear-gradient(to right,#6366F1,rgba(99,102,241,0.7)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">StackMate</div>
-            <div style="color:#9ca3af; font-size:11px; line-height:1.2;">함께 성장하는 개발자</div>
-          </div>
-        </RouterLink>
-        <button style="font-size:14px; color:#4b5563; background:none; border:none; cursor:pointer;">로그인</button>
-      </div>
-    </nav>
+    <NavBar />
 
     <!-- 히어로 이미지 -->
     <div style="width:100%; height:320px; overflow:hidden; background:#e0e7ff;">
@@ -308,7 +294,7 @@
 <script setup>
 import { computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import iconLogo from '../assets/Icon.svg'
+import NavBar from '../components/NavBar.vue'
 
 const router = useRouter()
 

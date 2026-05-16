@@ -1,18 +1,6 @@
-<template>
+﻿<template>
   <div style="min-height:100vh; background:#f4f4fd;">
-    <nav style="background:#fff; border-bottom:1px solid #e5e7eb; position:sticky; top:0; z-index:50;">
-      <div style="max-width:1280px; margin:0 auto; padding:0 40px; height:68px; display:flex; align-items:center; justify-content:space-between;">
-        <RouterLink to="/" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
-          <div style="width:44px; height:44px; background:#6366f1; border-radius:12px; display:flex; align-items:center; justify-content:center;">
-            <img :src="iconLogo" style="width:28px; height:28px;" alt="StackMate" />
-          </div>
-          <div>
-            <div style="font-weight:700; font-size:16px; background:linear-gradient(to right,#6366f1,rgba(99,102,241,0.7)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">StackMate</div>
-            <div style="color:#9ca3af; font-size:11px;">함께 성장하는 개발자</div>
-          </div>
-        </RouterLink>
-      </div>
-    </nav>
+        <NavBar />
 
     <div style="max-width:640px; margin:0 auto; padding:48px 40px;">
       <RouterLink :to="`/project/${route.params.id}`" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6b7280; text-decoration:none; margin-bottom:28px;">
@@ -114,7 +102,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { applyToProject, getProject } from '../api/project.js'
-import iconLogo from '../assets/Icon.svg'
+import NavBar from '../components/NavBar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -162,3 +150,4 @@ async function handleApply() {
   }
 }
 </script>
+

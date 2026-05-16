@@ -1,24 +1,7 @@
 <template>
   <div style="min-height:100vh; background:#f4f4fd;">
 
-    <!-- NAV -->
-    <nav style="background:#fff; border-bottom:1px solid #e5e7eb; position:sticky; top:0; z-index:50;">
-      <div style="max-width:1280px; margin:0 auto; padding:0 40px; height:68px; display:flex; align-items:center; justify-content:space-between;">
-        <RouterLink to="/" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
-          <div style="width:44px; height:44px; background:#6366f1; border-radius:12px; display:flex; align-items:center; justify-content:center;">
-            <img :src="iconLogo" style="width:28px; height:28px;" alt="StackMate" />
-          </div>
-          <div>
-            <div style="font-weight:700; font-size:16px; background:linear-gradient(to right,#6366f1,rgba(99,102,241,0.7)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">StackMate</div>
-            <div style="color:#9ca3af; font-size:11px;">함께 성장하는 개발자</div>
-          </div>
-        </RouterLink>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <RouterLink to="/" style="font-size:13px; color:#6b7280; text-decoration:none;">← 목록으로</RouterLink>
-          <button v-if="isLoggedIn" @click="clearAuth(); $router.push('/login')" style="font-size:13px; color:#6b7280; background:none; border:none; cursor:pointer;">로그아웃</button>
-        </div>
-      </div>
-    </nav>
+    <NavBar />
 
     <!-- 로딩 -->
     <div v-if="loading" style="text-align:center; padding:120px 0; color:#9ca3af; font-size:15px;">불러오는 중...</div>
@@ -353,8 +336,12 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { getProject, getComments, createComment, deleteComment, toggleCommentLike, addLike, removeLike, addBookmark, removeBookmark } from '../api/project.js'
 import { marked } from 'marked'
-import iconLogo from '../assets/Icon.svg'
 import { isLoggedIn, clearAuth, userId } from '../store/auth.js'
+import NavBar from '../components/NavBar.vue'
+import iconTeam    from '../assets/Icon (3).svg'
+import iconComment  from '../assets/Icon (7).svg'
+import iconLike     from '../assets/Icon (9).svg'
+import iconBookmark from '../assets/Icon (10).svg'
 
 const route = useRoute()
 const project = ref(null)
