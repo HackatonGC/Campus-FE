@@ -3,9 +3,11 @@ import HomeView from '../views/HomeView.vue'
 import DetailView from '../views/DetailView.vue'
 import ReviewRequestView from '../views/ReviewRequestView.vue'
 import TeamApplyView from '../views/TeamApplyView.vue'
+import LoginView from '../views/LoginView.vue'
 
 const routes = [
   { path: '/', component: HomeView },
+  { path: '/login', component: LoginView },
   { path: '/project/:id', component: DetailView },
   { path: '/project/:id/review', component: ReviewRequestView },
   { path: '/project/:id/apply', component: TeamApplyView },
